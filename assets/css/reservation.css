@@ -1,0 +1,779 @@
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background: #f0f0f0;
+    text-align: center;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+
+/* Navigation Bar */
+.navbar {
+    width: 100%;
+    background: #F5F5F5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 5%;
+    flex-wrap: wrap;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    gap: 40px;
+}
+
+/* Selection Container */
+.selection-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 100px;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+/* Dropdown Section */
+.dropdown-container {
+    display: flex;
+    gap: 15px;
+    margin-top: 18px;
+}
+
+/* Dropdown Label */
+.dropdown-label {
+    font-size: 20px;
+    color: #377684;
+    margin-top: 12px;
+}
+
+/* Custom Dropdown */
+.custom-dropdown {
+    position: relative;
+    width: 220px;
+}
+
+/* Style for the dropdown button */
+.dropdown-select {
+    width: 100%;
+    padding: 12px;
+    color:#898989;  
+    font-size: 16px;
+    font-family: 'Outfit', sans-serif;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    appearance: none;
+    text-align: left;
+}
+
+/* Add a custom dropdown arrow */
+.custom-dropdown::after {
+    content: "\25BC"; /* Unicode for downward arrow (▼) */
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #898989;
+    pointer-events: none;
+}
+
+/* Dropdown Hover & Focus */
+.dropdown-select:focus {
+    border-color: #ccc;
+    outline: none;
+}
+
+/* Floor Slider */
+.floor-slider {
+    position: relative;
+    font-family: 'Outfit', sans-serif;
+    width: 200px; /* Adjust width to fit 3 floors */
+    height: 45px;
+    background: white;
+    border-radius: 25px;
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 5px;
+}
+
+.slider-label
+{
+    font-size: 20px;
+    color: #377684;
+    margin-top: 12px;
+}
+
+/* Slider Thumb */
+.floor-slider-thumb {
+    position: absolute;
+    width: 60px; /* Adjust size for better fit */
+    height: 50px;
+    background: #377684;
+    border-radius: 25px;
+    transition: transform 0.2s ease-in-out;
+    left: 0;
+}
+
+/* Floor Numbers */
+.floor-numbers {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    font-size: 18px;
+    font-weight: bold;
+    color: #377684;
+}
+
+.floor-number {
+    cursor: pointer;
+    padding: 10px;
+    transition: color 0.2s ease-in-out;
+}
+
+.floor-number.selected {
+    color: white;
+}
+/* Floor Numbers */
+.floor-numbers {
+    display: flex;
+    width: 100%;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.floor-number {
+    position: relative;
+    z-index: 2;
+    font-size: 18px;
+    color: #898989;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Ensure selected number is on top */
+.floor-number.selected {
+    color: white;
+    font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .selection-container {
+        gap: 15px;
+    }
+
+    .floor-slider {
+        width: 220px;
+    }
+}
+
+
+/* Available Rooms Title */
+.available-rooms-title {
+    position: static;
+    font-family: "Newsreader", Helvetica;
+    font-weight: 400;
+    color: var(--variable-collection-color);
+    font-size: 24px;
+    letter-spacing: -0.64px;
+    line-height: 38.4px;
+    white-space: nowrap;
+    font-weight: bold;
+    padding: 20px;
+}
+
+/* Room Container */
+.room-container {
+    max-width: 1200px;
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Room Box Styling */
+.room-box {
+    width: 315px;
+    height: auto;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #377684;
+    display: inline-block;
+    margin: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    position: relative;
+    padding: 10px;
+    text-align: left;
+}
+
+.room-box:hover {
+    transform: scale(1.05);
+}
+
+.room-box img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.room-box .divider {
+    width: 100%;
+    height: 1px;
+    background: #898989;
+    margin: 10px 0;
+}
+
+/* Updated Layout for Room Info */
+.room-box .room-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.room-box .room-name {
+    font-size: 24px;
+    font-family: "Newsreader", sans-serif;
+    font-weight: bold;
+}
+
+.room-box .room-details {
+    font-size: 16px;
+    text-align: center;
+}
+/*-------------------------------------------------------------*/
+
+/* Overlay Styles */
+.overlay {
+    position: fixed;
+    top: 0;    background-color: rgba(0, 0, 0, 0.4);
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Main Overlay Container */
+.overlay-content {
+    transform: scale(1.05);
+    background: white;
+    border-radius: 10px;
+    width: 750px;
+    max-width: 90%;
+    padding: 40px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Title Styling */
+.overlay-title {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+/* Reserve Room Title */
+.overlay-content h2 {
+    font-size: 24px; /* Increase font size */
+    font-family: outfit;
+    padding-bottom: 15px; /* Add space below the title */
+    color:#595858;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Input & Select Styles */
+.overlay-content label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.overlay-content input,
+.overlay-content select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Date-Time Container */
+.date-time-container {
+    display: flex;
+    color: #595858;
+    font-size: 12px;
+    font-family: outfit;
+    justify-content: space-between; /* Aligns elements beside each other */
+    align-items: center;
+    gap: 40px; /* Space between elements */
+    width: 100%;
+}
+
+/* Individual Input Box */
+.date-picker-container,
+.time-picker-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%; 
+    gap: 10px; 
+}
+
+/* Labels */
+.date-picker-container label,
+.time-picker-container label {
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+/* Inputs and Select */
+.date-picker-container input,
+.time-picker-container select {
+    width: 100%;
+    padding: 10px;
+    font-family: outfit;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 12fpx;
+}
+
+
+
+/* Seat Layout */
+.seat-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Seat Grid */
+.seat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Seat Row */
+.seat-row {
+    display: flex;
+    gap: 15px;
+}
+
+/* Seat SVG */
+.seat-svg {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.seat-svg:hover {
+    transform: scale(1.1);
+}
+
+.seat-svg.unavailable {
+    cursor: not-allowed;
+}
+/* Hover Effect */
+.seat.available:hover {
+    transform: scale(1.1);
+}
+
+/* Divider Bar */
+.divider-bar {
+    width: 100%;
+    height: 10px;
+    background: #D1D5DB;
+    border-radius: 5px;
+    margin: 5px 0;
+}
+
+/* Front Label */
+.front-label {
+    font-family: Outfit;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 16px;
+    color: #333;
+    background: #D1D5DB;
+    padding: 25px 5px;
+    border-radius: 5px;
+    margin-left: 20px;
+}
+
+/* Legend */
+.legend-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.close-button {
+    position: absolute;
+    right: 25px;
+    top: 15px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+
+/* reserve Button */
+.reserve-button {
+    background: white; /* Gray background for close */
+}
+
+.reserve-button:hover {
+    background: #1d5b3e; /* Darker gray on hover */
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header, .navbar {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .nav-item {
+        padding: 5px;
+    }
+
+    .room-box {
+        max-width: 100%;
+    }
+}
+
+/* Seat Info Overlay */
+.seat-info-overlay {
+    display: column;
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    /* min-height: 100px; */
+}
+
+/* "This Seat Is Available" Text */
+.available-text {
+    font-family: "Outfit", sans-serif;
+    color: #1d5b3e;
+    font-size: 17px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* Checkbox and Label Container */
+.anonymous-container {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: left;
+    justify-content: left; 
+    white-space: nowrap;
+    gap: 5px;
+}
+
+/* Checkbox Styling */
+.anonymous-checkbox {
+    display: block;
+    accent-color: #1d5b3e;
+    cursor: pointer;
+    align-items: left;
+    margin: 0%;
+}
+
+.anonymous-label {
+    display: block;
+    font-family: "Outfit";
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    align-items: left;
+}
+
+/* Confirm Button */
+.confirm-btn {
+    font-family: "Outfit", sans-serif;
+    width: 55%;
+    margin-bottom: 5px; 
+    padding: 3px;
+    background: white;
+    color: #3C4B5F; /* Dark text color */
+    font-size: 14px;
+    border: 1px solid #D1D5DB; /* Light gray border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    display: block;
+}
+
+.confirm-btn:hover {
+    background: #14432b;
+    color: white;
+}
+
+
+.confirm-btn:hover {
+    background: #14432b;
+    color: white;
+}
+
+.occupied-text {
+    font-family: "Outfit";
+    color: #900B09;
+    font-size: 17px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/*-------------------------------------------------------------*/
+
+/* Main container for seat layout and seat info */
+.main-overlay-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    gap: 20px;
+}
+
+/* Reservation Details Container */
+.reservation-details {
+    border-radius: 10px;
+    padding: 10px;
+    width: 100%;
+    max-width: px;
+    font-size: 14px;
+    text-align: left;
+}
+
+/*-----------------------------------------------------------*/
+
+/* Confirmation Overlay */
+.confirmation-content {
+    background: white;
+    border-radius: 12px;
+    width: 700px;
+    max-width: 90%;
+    padding: 30px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    text-align: center;
+    font-family: "Outfit", sans-serif;
+}
+
+.confirmation-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.confirmation-header i {
+    font-size: 60px;
+    color: #1d5b3e;
+}
+
+.confirmation-header h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.confirmed-text {
+    color: #1d5b3e;
+    font-weight: bold;
+}
+
+hr {
+    width: 100%;
+    margin: 15px 0;
+    border: 0.5px solid #ccc;
+}
+
+.confirmation-message {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: left;
+    padding: 15px;
+}
+
+.confirmation-subtext {
+    font-size: 14px;
+    color: #555;
+}
+
+.confirmation-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.room-image {
+    width: 265px;
+    border-radius: 8px;
+}
+
+.confirmation-details {
+    
+    width: 250px;
+    height: 200px;
+    text-align: left;
+    background-color: #ebe8e8;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.reservation-date {
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+}
+
+.reservation-month {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+}
+
+.reservation-time {
+    margin-top: 3px;
+    font-size: 13px;
+    text-align: center;
+    color: #333;
+}
+
+.reservation-reference,
+.reservation-building,
+.reservation-room {
+    font-size: 14px;
+    color: #333;
+}
+
+.home-btn {
+    width: 60%;
+    margin-bottom: 5px; 
+    padding: 8px;
+    background: white;
+    color: #3C4B5F; /* Dark text color */
+    font-size: 14px;
+    border: 1px solid #D1D5DB; /* Light gray border */
+    border-radius: 8px; /* Rounded corners */
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.home-btn:hover {
+    background: #F3F4F6; /* Light gray background on hover */
+    border-color: #B0B3B8; /* Slightly darker border */
+}
+
+.close-button {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+#signed-in {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+}
+
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    /* padding: 20px 30px; */
+    width: 100%;
+    max-width: 400px;
+    text-align: left;
+}
+
+/* Wrapper for the dropdown */
+.selectstudent-dropdown {
+    position: relative;
+    width: 100%;
+    max-width: 220px; /* Adjust as needed */
+}
+
+/* Smaller text, remove margins, and proper width */
+.dropdown-select.small-text {
+    font-size: 12px;
+    padding: 4px 8px;
+    height: 32px;
+    width: 100%;
+    margin: 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-family: 'Outfit', sans-serif;
+    background: white;
+    cursor: pointer;
+}

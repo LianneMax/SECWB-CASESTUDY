@@ -1,0 +1,131 @@
+<html>
+<head>
+    <title>Dashboard</title>
+    
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/styleguide.css">
+    <link rel="stylesheet" href="css/dashboardStyle.css">
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <div class="logo-container">
+        <img src="images/LabyrinthLogo.png" alt="Labyrinth Logo" onclick="redirectToDashboard()">
+    </div>
+
+    <div class="labyrinthHeader">Labyrinth</div>
+
+    <!-- Profile Picture & Dropdown (Right-Aligned) -->
+    <div class="profile-dropdown">
+        <img class="profile-icon" src="{{userData.profile_picture}}" alt="Profile" id="profileDropdownBtn">
+        <div class="dropdown-menu" id="profileDropdown">
+            <a href="/profile">Go to Profile</a>
+
+            <!-- redirects to index.html -->
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+</header>
+
+<!-- Main Dashboard Content -->
+<div class="dashboard-html">
+    <div class="overlap">
+        <div class="left-side">
+            <h1 class="welcomeHeader">Welcome, {{userData.first_name}}</h1>
+            <p class="sloganHeader">Don’t get lost in scheduling — Book easily!</p>
+
+            <div class="overlap-group">
+                <div class="reservations">
+                    <div class="rectangle">
+                        <!-- Current Reservations Table -->
+                        <div class="reservationContainer">
+                            <table id="currentReservationsTable">
+                                <thead>
+                                    <tr>
+                                        <th colspan="5" class="reservationHeader">Current Reservations</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Room Number</th>
+                                        <th>Seat Number</th>
+                                        <th>Date</th>
+                                        <th>Time Slot</th>
+                                        <th>Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <!-- Right Side Content -->
+            <div class="right-side">
+
+                <!-- Reserve Now Section -->    
+                <div class="reserveContainer">
+                    <div class="reserveLabSlot">
+                        <p class="ContainerText">Reserve your Laboratory Slot now!</p>
+                        <img class="classroomArt" src="images/IndexPhoto.png">
+                        <button class="reserveButton" onclick="window.location.href='/reserve'">Reserve Now!</button>
+                    </div>
+                </div>
+
+            <!-- About Container -->
+            <div class="aboutContainer">
+                <div class="aboutSection">
+                    <p class="ContainerText">Learn More About Us</p>
+                    <img class="aboutImage" src="images/AboutUs.png" />
+                    <button class="reserveButton" onclick="window.location.href='/about-us'">Explore</button>
+
+                </div>
+            </div>
+
+
+            
+        </div>
+    </div>
+</div>
+
+<!-- Edit Overlay (Hidden by Default) -->
+<div class="edit-overlay">
+    <div class="edit-container">
+        <h2>EDIT RESERVATION</h2>
+
+        <!-- Date-Time Selection -->
+        <div class="date-time-container">
+            <!-- Date Picker -->
+            <div class="date-picker-container">
+                <label for="edit-date">Select Date:</label>
+                <input type="date" id="edit-date" required>
+            </div>
+
+            <!-- Time Picker -->
+            <div class="time-picker-container">
+                <label for="edit-time">Select Time:</label>
+                <select id="edit-time"></select>
+            </div>
+        </div>
+
+        <!-- Reservation Details -->
+        <div class="reservation-details">
+            <p id="edit-room"><strong>Room:</strong> Not Selected</p>
+            <p id="edit-seat"><strong>Seat:</strong> Not Selected</p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-group">
+            <button id="saveButton">Save Changes</button>
+            <button id="cancelButton">Cancel</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- JavaScript -->
+<script src="js/common.js"></script>
+<script src="js/dashboardJS.js"></script>
+</body>
+</html>

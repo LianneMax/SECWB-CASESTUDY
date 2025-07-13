@@ -1,0 +1,275 @@
+/* 
+    Last updated by: Jeremiah Ang
+    Date: Feb 12, 2025 - 11:54 AM
+
+    Notes: 
+    - Removed extra containers
+    - Properly aligned image and form
+    - Matched layout to the provided screenshot
+    - Ensured clean and structured styling
+
+    TODO: Popup CSS styling
+*/
+
+/* Prevent scrolling */
+html, body {
+  overflow: hidden;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+}
+
+/* Main Container */
+.register-page-container {
+  width: 90%;
+  height: 95vh;
+  background: white;
+  display: flex;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Left Side - Image Section */
+.register-photo {
+  width: 40%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  overflow: hidden;
+}
+
+/* Background Image */
+.register-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.7);
+}
+
+/* Logo */
+.logo-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+/* Logo Icon */
+.logo-icon {
+  width: 50px;
+  height: auto;
+  filter: brightness(1) !important;
+} 
+
+.logo-text {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: 'Newsreader', serif;
+}
+
+/* Right Side - Registration Form */
+.right-side {
+  width: 60%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Registration Box */
+.register-box {
+  width: 85%;
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+}
+
+/* Title */
+.register-your-account {
+  font-family: 'Newsreader', serif;
+  font-weight: 700;
+  font-size: 28px;
+  text-align: center;
+  color: black;
+  padding: 40px;
+}
+
+.blue-text {
+  color: #377684;
+}
+
+/* Form Container */
+.registration-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+/* Input Group */
+.input-group {
+  position: relative;
+  width: 100%;
+  font-family: outfit;
+  font-size: 14px;
+}
+
+/* Static Label */
+.static-label {
+  position: absolute;
+  left: 14px;
+  top: -10px;
+  font-size: 14px;
+  color: #4F4F4F;
+  background: white;
+  padding: 0 5px;
+}
+
+/* Static Input */
+.static-input {
+  font-family: outfit;
+  width: 100%;
+  font-size: 14px;
+  border: 1px solid #898989;
+  border-radius: 10px;
+  outline: none;
+  height: 50px;
+  background: white;
+  padding-left: 15px;
+}
+
+/* Input Row */
+.input-row-container {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+
+/* Buttons */
+.create-button {
+  width: 100%;
+  padding: 14px;
+  background: #377684;
+  font-family: 'Newsreader', serif;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.create-button:hover {
+  background: #2a5a5f;
+}
+
+/* Already Have an Account */
+.already-account, .login {
+  font-family: 'Newsreader', serif;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.login {
+  color: #377684;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+/*-----------------------------------------------------------------*/
+
+/* General Modal Styling */
+.modal {
+  display: none; /* Initially hidden */
+  position: fixed;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal Content */
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Success Title */
+.success-title {
+  font-size: 24px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: bold;
+  color: #1E3A4D;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+/* Subtitle */
+.success-subtitle {
+  font-size: 16px;
+  color: #6C757D;
+  text-align: center;
+}
+
+/* Body Flex Container */
+.success-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px; /* Spacing between image & button */
+}
+
+/* Success Image */
+.success-image {
+  max-width: 200px;
+  height: auto;
+}
+
+/* Get Started Button */
+.get-started-button {
+  font-family: Newsreader;
+  background: #377684;
+  color: white;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.get-started-button:hover {
+  background: #2a5a5f;
+}
+
+
+
+

@@ -1,0 +1,136 @@
+<html>
+<head>
+    <title>Labyrinth Register Page</title>
+
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/styleguide.css">
+    <link rel="stylesheet" href="css/registerStyle.css">
+</head>
+
+<body>
+    <!-- Main Container -->
+    <div class="register-page-container">
+        
+        <!-- Left Side - Image Section -->
+        <div class="register-photo">
+            <div class="logo-container">
+                <img src="images/LabyrinthLogo.png" class="logo-icon">
+                <span class="logo-text">Labyrinth</span>
+            </div>
+            <img src="images/RegisterPhoto.png" alt="Background Image">
+        </div>
+
+        <!-- Right Side - Registration Form -->
+
+        <div class="right-side">
+            <div class="register-box">
+                <!-- Register Header -->
+                <p class="register-your-account">
+                    Register your <span class="blue-text">Labyrinth</span> Account
+                </p>
+
+                <!-- Registration Form -->
+                <form id="registrationForm" enctype="multipart/form-data">
+                    <div class="registration-container">
+
+                        <!-- Row 1: First & Last Name -->
+                        <div class="input-row-container">
+                            <div class="input-group">
+                                <label class="static-label" for="first_name">First Name</label>
+                                <input type="text" id="first_name" name="first_name" class="static-input" placeholder="Jimmy" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label class="static-label" for="last_name">Last Name</label>
+                                <input type="text" id="last_name" name="last_name" class="static-input" placeholder="McGill" required>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: DLSU Email & ID Number -->
+                        <div class="input-row-container">
+                            <div class="input-group">
+                                <label class="static-label" for="email">DLSU Email</label>
+                                <input type="email" id="email" name="email" class="static-input" placeholder="jimmy_mcgill@dlsu.edu.ph" required>
+                            </div>
+
+                        </div>
+
+                        <!-- Password Fields -->
+                        <div class="input-group">
+                            <label class="static-label" for="password">Enter password</label>
+                            <input type="password" id="password" name="password" class="static-input" placeholder="Password must be at least 15 characters" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="static-label" for="confirm_password">Confirm password</label>
+                            <input type="password" id="confirm_password" name="confirm_password" class="static-input" placeholder="Re-enter Password" required>
+
+                            <br><br></br><p class="helper-text">This will be used to recover your account if you forget your password.</p>
+                        </div>
+
+
+                                        <!-- Security Questions -->
+                                        <div class="input-row-container">
+                                            <div class="input-group">
+                                                <label class="static-label" for="security_question">Security Question</label>
+                                                <input type="text" 
+                                                    id="security_question" 
+                                                    name="security_question" 
+                                                    class="static-input" 
+                                                    placeholder="Enter your security question" 
+                                                    required>
+                                            </div>
+                                        </div>
+                
+                                        <div class="input-row-container">
+                                            <div class="input-group">
+                                                <label class="static-label" for="security_answer">Security Answer</label>
+                                                <input type="text" 
+                                                    id="security_answer" 
+                                                    name="security_answer" 
+                                                    class="static-input" 
+                                                    placeholder="Enter your answer" 
+                                                    required>
+                                            </div>
+                                        </div>
+
+                        <!-- Hidden Account Type Field -->
+                        <input type="hidden" id="account_type" name="account_type" value="Student">
+
+                        <!-- Create Account Button -->
+                        <button type="button" class="create-button">CREATE ACCOUNT</button>
+
+                        <!-- Already have an account? -->
+                        <div class="login-container">
+                            <div class="already-account">Already have an account?</div>
+                            <a href="/login"> <div class="login">Login</div> </a>
+                        </div>
+
+                    </div>
+                </form>
+                <!-- End of form -->
+            </div>
+        </div>
+    </div> 
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <!-- Success Message -->
+            <h2 class="success-title"><strong>You're All Signed Up!</strong></h2>
+            <p class="success-subtitle">Your account has been created successfully!</p>
+
+            <!-- Flex Container for Button & Image -->
+            <div class="success-body">
+                <!-- Button Section -->
+                <button id="getStartedButton" class="get-started-button">Get Started</button>
+
+                <!-- Image Section -->
+                <img src="images/AccountCreated.webp" alt="Success Image" class="success-image">
+            </div>
+        </div>
+    </div>
+
+    <script src="js/registerJS.js"></script>
+</body>
+</html>

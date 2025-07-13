@@ -1,0 +1,299 @@
+<html>
+<head>
+    <title>{{userData.first_name}} {{userData.last_name}}'s profile</title>
+
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/styleguide.css">
+    <link rel="stylesheet" href="css/profileStyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <div class="logo-container">
+        <img src="images/LabyrinthLogo.png" alt="Labyrinth Logo" onclick="redirectToDashboard()">
+    </div>
+
+    <div class="labyrinthHeader">Labyrinth</div>
+
+    <div class="profile-dropdown">
+        <img class="profile-icon" src="{{sessionUser.profile_picture}}" alt="Profile" id="profileDropdownBtn">
+        <div class="dropdown-menu" id="profileDropdown">
+            <a href="profile">Go to Profile</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+</header>
+
+<!-- Profile Heading -->
+<div class="profile-heading">
+    <img id="cover-image" src="images/Background.png" alt="Cover Image">
+    <div class="cover-content-container">
+        <div class="avatar-container">
+            <img class="profile-picture" src="{{userData.profile_picture}}" alt="Profile Picture">
+        </div>
+        <div class="text-container">
+            <div class="profile-name">{{userData.first_name}} {{userData.last_name}}</div>
+            <div class="profile-type">{{userData.account_type}}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="dashboard-html">
+    <div class="overlap">
+        <!-- User Details Section -->
+        <div class="user-details">
+            <div class="profile-details">
+                <h2 class="section-title">Profile Details</h2>
+                <div class="divider"><div class="bar"></div></div>
+
+                <div class="subsection-container">
+                    <div class="subsection-title">Email</div>
+                    <div class="subsection-content">{{userData.email}}</div>
+                </div>
+
+                <div class="divider"><div class="bar"></div></div>
+
+                <div class="subsection-container">
+                    <div class="subsection-title">Description</div>
+                    <div class="subsection-content">{{userData.description}}</div>
+                </div>
+
+                <div class="divider"><div class="bar"></div></div>
+
+                <div class="button-container">
+                    {{#if (eq userData.email sessionUser.email)}}
+                        <button class="edit-profile-button" id="editProfileBtn">Edit Profile</button>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Reservations Table -->
+        <div class="reservationContainer">
+            <!-- Current Reservations -->
+            <table id="currentReservationsTable">
+                <thead>
+                    <tr>
+                        <th colspan="4" class="reservationHeader">Reservations History:</th>
+                    </tr>
+                    <tr>
+                        <th>Room Number</th>
+                        <th>Seat Number</th>
+                        <th>Date</th>
+                        <th>Time Slot</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" class="modal">
+    <div class="modal-content">
+        
+        <!-- Close Button -->
+        <span class="close">&times;</span>
+
+        <!-- Modal Header Section -->
+        <div class="modal-header">
+            <img src="images/Background.png" class="modal-cover" alt="Cover Image">
+
+            <!-- Profile Information -->
+            <div class="profile-info">
+
+                    
+                    <!-- Profile Picture Upload Form -->
+                    <form action="/profile" method="post" enctype="multipart/form-data">
+                        <div class="modal-profile-container">
+                            <img class="modal-profile-picture" src="{{userData.profile_picture}}" alt="Profile Picture" id="profilePicturePreview">
+
+                            <div class="change-photo-button-container">
+                                <!-- This button acts as both a trigger and submit when a file is selected -->
+                                <button type="button" class="change-photo-btn" id="uploadPhotoBtn">Upload Photo</button>
+                                <input type="file" name="profile_picture" id="profileInput" class="hidden-file-input">
+                            </div>
+                        </div>
+                    </form>
+
+                <!-- Name & Role -->
+                <div class="profile-text">
+                    <h3>{{userData.first_name}} {{userData.last_name}}</h3>
+                    <p>{{userData.account_type}}</p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="curved-divider"></div>
+        
+        <!-- Modal Body -->
+        <form action="/submit-profile-details" method="post">
+        <div class="modal-body">
+            <h3 class="section-title">Personal Information</h3>
+
+            <!-- First Name & Last Name Row --> 
+            <div class="input-row">
+                <div class="input-group">
+                    <label class="static-label" for="firstName">First Name</label>
+                    <input type="text" name="first_name" class="static-input" placeholder="{{userData.first_name}}">
+                </div>
+
+                <div class="input-group">
+                    <label class="static-label" for="lastName">Last Name</label>
+                    <input type="text" name="last_name" class="static-input" placeholder="{{userData.last_name}}">
+                </div>
+            </div>
+
+            <!-- Profile Description -->
+            <div class="input-group">
+                <textarea name="description" id="profileDescription" class="static-input" placeholder=" "></textarea>
+                <label class="static-label" for="profileDescription">Profile Description</label>
+            </div>
+        </div>
+        
+
+        <!-- Divider -->
+        <div class="divider"></div>
+
+        <div class="modal-footer">
+            <!-- Delete Account Button (Prevent Submission) -->
+            <button id="deleteAccountBtn" type="button" class="delete-btn">Delete Account</button>
+
+            <!-- Change Password Button (Prevent Submission) -->
+            <button id="changePasswordBtn" type="button" class="password-btn">Change Password</button>
+
+            <!-- Save Changes Button (Submits the Form) -->
+            <button id="saveChanges" type="submit" class="save-btn">Save Changes</button>
+        </div>
+    </div>
+
+    </form>
+</div>
+
+
+<!-- Save Changes Confirmation Modal -->
+<div id="saveChangesModal" class="modal">
+    <div class="modal-content unsaved-changes">
+        <span class="close-confirm">&times;</span>
+        
+        <!-- Save Icon -->
+        <div class="save-icon">
+            <i class="fa-solid fa-floppy-disk icon"></i>
+        </div>
+
+        <!-- Title & Message -->
+        <h2>Save Changes?</h2>
+        <p>Changes that you have made may not be saved.</p>
+
+        <!-- Buttons -->
+        <div class="button-group">
+            <button id="cancelBtn" class="cancel-btn">Cancel</button>
+            <button id="leaveBtn" class="leave-btn">Leave</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Confirmation Modal -->
+<div id="deleteAccountModal" class="modal">
+    <div class="delete-account">
+
+        <!-- Delete Icon -->
+        <div class="delete-icon">
+            <i class="fa-solid fa-trash-can"></i>
+        </div>
+
+        <!-- Title & Message -->
+        <h2>Are you sure you want to delete your account?</h2>
+        <p>This action is permanent.<br><br>You will need to register a new account to reserve lab slots.</p>
+
+        <!-- Buttons -->
+        <div class="button-group">
+            <button id="cancelDeleteBtn" class="cancel-btn">Cancel</button>
+            <button id="confirmDeleteBtn" class="confirm-btn">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Account Successfully Deleted Modal -->
+<div id="accountDeletedModal" class="modal">
+    <div class="account-deleted">
+        <!-- Delete Icon -->
+        <div class="delete-icon">
+            <i class="fa-solid fa-trash-can"></i>
+        </div>
+
+        <!-- Title & Message -->
+        <h2>Account Successfully Deleted</h2>
+        <p>Thank you for using <span style="color: #377684; font-weight: bold;">Labyrinth</span>!</p>
+
+        <!-- Button to go back to home page -->
+        <button id="goBackHomeBtn" class="back-btn">Go Back to Home Page</button>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<form action="/changepassword" method="post">
+    <div id="changePasswordModal" class="modal">
+        <div class="change-password">
+            <div class="lock-icon">
+                <i class="fa fa-lock"></i>
+            </div>
+
+            <!-- Close Button -->
+            <span class="close">&times;</span>
+
+            <!-- Title & Description -->
+            <h2>Create New Password</h2>
+            <p>Please enter and confirm your new password.</p>
+
+            <!-- Input Fields -->
+            <div class="input-group">
+                <label class="static-label" for="new-password">New Password:</label>
+                <input type="password" id="new-password" name="newPassword" class="static-input" required>
+            </div> 
+            
+            <div class="input-group">
+                <label class="static-label" for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirmPassword" class="static-input" required>
+            </div>   
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-btn change-submit-btn">Submit</button>
+        </div>
+    </div>
+</form>
+
+
+
+<!-- Success Changes Modal -->
+<div id="successChangesModal" class="modal">
+    <div class="successfully-changed">
+        <div class="check-icon">
+            <i class="fa fa-check-circle"></i>
+        </div>
+
+        <!-- Close Button -->
+        <span class="close close-success-changes">&times;</span>
+
+        <!-- Title & Message -->
+        <h2>Changes Successfully Saved</h2>
+        <p>Thank you for using <span style="color: #377684; font-weight: bold;">Labyrinth</span>!</p>
+
+        <!-- Button to go back to profile -->
+        <button id="goBackProfileBtn" class="back-btn">Go Back to Profile</button>
+    </div>
+</div>
+
+
+<!-- JavaScript -->
+<script src="js/common.js"></script>
+<script src="js/profileJS.js"></script>
+
+</body>
+</html>

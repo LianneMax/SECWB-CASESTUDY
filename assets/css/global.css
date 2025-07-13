@@ -1,0 +1,158 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Odor+Mean+Chey&family=Newsreader:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap");
+
+* {
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+html, body {
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* Top Header Styles */
+
+.header {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Ensures elements are spaced */
+  padding: 0 20px; /* Adds spacing on left and right */
+  background-color: var(--variable-collection-color);
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.logo-container img {
+  width: 60px; /* Adjust size if necessary */
+  height: auto;
+}
+
+.profile-icon {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    margin-left: auto;
+
+    /* made the profile icon circular */
+    border-radius: 100%; 
+    overflow: hidden;
+}
+
+.labyrinthHeader {
+  font-family: "Odor Mean Chey", Helvetica, sans-serif;
+  font-size: 32px;
+  color: #ffffff;
+  text-align: center;
+  flex: 1; 
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+} 
+
+/* Profile Dropdown Container */
+.profile-dropdown {
+  position: relative;
+  display: inline-block;
+
+}
+
+/* Hidden Dropdown Menu */
+.dropdown-menu {
+  display: none; /* Hidden by default */
+  position: absolute;
+  right: 0;
+  background-color: white;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 150px;
+  z-index: 1000;
+}
+
+/* Dropdown Menu Items */
+.dropdown-menu a {
+  font-family: outfit;
+  display: block;
+  padding: 10px;
+  text-decoration: none;
+  color: black;
+  font-size: 14px;
+  transition: background 0.3s;
+  text-align: left;
+}
+
+.dropdown-menu a:hover {
+  background-color: #f1f1f1;
+}
+
+
+.elementContainer .element-avatar {
+  width: 73px;
+  height: 73px;
+  border-radius: 1823.17px;
+  border: 1.82px solid;
+  border-color: var(--x-backgrounddefault);
+  background-image: url('../../uploads/profile_pics/avatar.png');
+  background-size: cover;
+  float: right;
+  background-position: 50% 50%;
+  position: absolute;
+  right: 20px;
+}
+
+.headerButtonContainer {
+  display: flex;
+  gap: 10px;
+  position: absolute;
+  right: 20px;
+}
+
+.headerButtonContainer .button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  font-family: "Newsreader", Helvetica, sans-serif;
+  font-size: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  min-width: 90px;
+  text-align: center;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  border: none;
+}
+
+.headerButtonContainer .button-login {
+  background-color: white;
+  color: black;
+}
+
+.headerButtonContainer .button-login:hover {
+  background-color: #cecece;
+}
+
+
+.headerButtonContainer .button-register {
+  background-color: #2C2C2C;
+  color: white;
+}
+
+.headerButtonContainer .button-register:hover {
+  background-color: black;
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+}

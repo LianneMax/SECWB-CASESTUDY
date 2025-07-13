@@ -1,0 +1,101 @@
+/* Reservations Table stylesheet */
+  
+
+/* ======= REUSABLE BUTTON ======= */
+
+.edit-button {
+  box-sizing: border-box;
+  display: flex;
+  width: 120px;
+  justify-content: center;
+  margin: auto;
+  padding: var(--size-space-300);
+  border-radius: var(--size-radius-200);
+  color: white;
+  background-color: #000000;
+  border: 1px solid;
+  border-color: #585858;
+}
+
+.edit-button:hover {
+  color:black;
+  background-color: #E3E3E3;
+}
+
+/* ======= END OF REUSABLE BUTTON ======= */
+
+
+  .reservations {
+    display: flex;
+    flex-direction: column;
+    width: 955px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .reservationHeader {
+    font-family: "Outfit-Regular", Helvetica;
+    font-size: 24px;
+    position: relative;
+    font-weight: 400;
+    color: #000000;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  .reservationContainer {
+    position: relative;
+    width: 875px;
+    min-height: 100px;
+    top: 40px;
+    bottom: 40px;
+    border-radius: 4px;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+  }
+
+  .table1Header {
+    font-family: "Outfit-Regular", Helvetica;
+    font-size: 20px;
+    position: relative;
+    color: #000000;
+    text-align: left;
+    padding: 10px;
+    border-right: 3px solid black;
+  }
+
+  .tableCell {
+    font-family: "Outfit-Regular", Helvetica;
+    font-size: 16px;
+    position: relative;
+    color: #000000;
+    padding: 10px;
+    border-right: 3px solid black;
+  }
+
+  .buttonCell {
+    display: flex;
+    position: relative;
+    color: #000000;
+    padding: 10px;
+  }
+
+  /* Remove right border from the last column */
+  .table1Header:last-child {
+    border-right: none;
+  }
+  
+  .tableRow {
+    border: 3px solid black;
+  }
+
+  .tableRow:last-child {
+    border-bottom: none;
+  }
+
+  .tableCell:last-child {
+    border-right: none;
+  }

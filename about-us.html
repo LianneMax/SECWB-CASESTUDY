@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>About Us | Labyrinth</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/about.css">
+  <link rel="stylesheet" href="css/styleguide.css">
+  <link rel="stylesheet" href="css/dashboardStyle.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <div class="logo-container">
+        <img src="images/LabyrinthLogo.png" alt="Labyrinth Logo" onclick="redirectToDashboard()">
+    </div>
+
+    <div class="labyrinthHeader">About Labyrinth</div>
+
+</header>
+
+  <div class="aboutPage">
+    <p class="aboutSubheader">
+      We built Labyrinth to provide students with an easy way to reserve lab slots, check availability, and streamline on-campus resources—all in one place.
+    </p>
+
+    <div class="aboutContentContainer">
+      <div class="aboutCard">
+        <p>
+            Our mission is to enhance student productivity through an intuitive and seamless scheduling experience. Labyrinth offers an efficient, student-friendly platform built on modern UI principles. We believe in accessible, easy-to-use tools that empower students to manage their academic schedules with ease.
+        </p>
+      </div>
+
+      <div class="aboutCard">
+        <p>
+            Labyrinth was developed by a team of student developers from DLSU as part of the requirements for the CCAPDEV course under Sir Arturo Caronongan. The team is composed of developers, designers, and thinkers dedicated to making academic life smoother through smart digital solutions.
+        </p>
+      </div>
+    </div>
+
+<!-- Tech Stack & Logos -->
+<div class="aboutTechWrapper">
+    <!-- Tools Section -->
+    <div class="toolsContainer">
+      <div class="aboutStackContainer">
+        <h2>📦 Tools & Libraries Used</h2>
+        <ul class="stackList">
+            <li><strong>Node.js</strong><br>Backend runtime environment that executes JavaScript server-side.</li>
+            <li><strong>Express.js</strong><br>Web framework used to handle routing, middleware, and server logic.</li>
+            <li><strong>Handlebars (hbs)</strong><br>Templating engine for rendering dynamic content using server-side data.</li>
+            <li><strong>MongoDB + Mongoose</strong><br>NoSQL database and ODM for storing and managing user, room, and reservation data.</li>
+            <li><strong>express-session</strong><br>Used to manage login sessions and maintain user state across routes.</li>
+            <li><strong>cookie-parser</strong><br>Middleware that parses cookies for features like "Remember Me."</li>
+            <li><strong>express-fileupload</strong><br>Enables profile picture uploads for users and lab technicians.</li>
+            <li><strong>Font Awesome</strong><br>Icon library used for the Home button and other UI elements.</li>
+            <li><strong>Render</strong><br>Hosting platform used to deploy the Labyrinth web app to production.</li>
+          </ul>
+      </div>
+    </div>
+  
+    <!-- Logos Side by Side -->
+    <div class="logosSideBySide">
+      <div class="logoCard"><img src="images/Node.png" alt="Node.js Logo"></div>
+      <div class="logoCard"><img src="images/Mongodb.svg" alt="MongoDB Logo"></div>
+      <div class="logoCard"><img src="images/Render.jpg" alt="Render Logo"></div>
+    </div>
+  </div>
+  
+  <!-- Team Members Section -->
+  <div class="teamSection">
+    <a class="teamMember" href="https://github.com/jeremiahmaxwellang" target="_blank">
+      <img src="images/Jeremiah.jpg" alt="Jeremiah Maxwell Ang">
+      <p>Jeremiah Maxwell Ang</p>
+    </a>
+    <a class="teamMember" href="https://github.com/LianneMax" target="_blank">
+      <img src="images/Max.jpg" alt="Lianne Maxene Balbastro">
+      <p>Lianne Maxene Balbastro</p>
+    </a>
+    <a class="teamMember" href="https://github.com/ikyledj" target="_blank">
+      <img src="images/KyleDJ.jpg" alt="Kyle De Jesus">
+      <p>Kyle De Jesus</p>
+    </a>
+    <a class="teamMember" href="https://github.com/Duelly01" target="_blank">
+      <img src="images/Charles.jpg" alt="Charles Kevin Duelas">
+      <p>Charles Kevin Duelas</p>
+    </a>
+  </div>
+  
+<!-- Moved Button Below Team Section -->
+<div class="homeButtonContainer">
+    <button class="homeButton" onclick="window.location.href='/dashboard'">
+      <i class="fas fa-home"></i>
+    </button>
+  </div>
+  
+</div>
+
+<script src="js/common.js"></script>
+</body>
+</html>

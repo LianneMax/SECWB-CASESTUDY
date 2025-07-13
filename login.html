@@ -1,0 +1,134 @@
+<html>
+<head>
+    <title>Login Page</title>
+    <link rel="stylesheet" href="css/loginStyle.css">
+    <link rel="stylesheet" href="css/styleguide.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Image Section -->
+        <div class="image-section">
+            <div class="overlay"></div>
+            <img src="images/LoginPhoto.jpg" alt="Background Image">
+            <div class="logo-container">
+                <img src="images/LabyrinthLogo.png" alt="Labyrinth Logo">
+                <span class="logo-text">Labyrinth</span>
+            </div>
+        </div>
+
+        <!-- Right Login Section -->
+        <div class="login-section">
+            <div class="title">
+                <b>Sign in to </b><span class="labyrinth">Labyrinth</span>
+            </div>
+            <p class="text-section details">Kindly Enter your Details Below</p>
+
+
+
+            <form id="login-form" action="/login" method="post">
+                <div class="input-container">
+                    <i class="fa-solid fa-user icon"></i>
+                    <input name="email" id="email" type="text" placeholder="DLSU Email" class="input-field">
+                </div>
+                
+                <div class="input-container">
+                    <i class="fa-solid fa-lock icon"></i>
+                    <input name="password" id="password" type="password" placeholder="Password" class="input-field">
+                </div>
+
+                <div class="remember-forgot">
+                    <label>
+                        <input type="checkbox" name="rememberMe"> Remember me
+                    </label>
+                    <a href="#" id="forgot-password-link">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="login-button">LOGIN</button>
+
+                <p class="sign-up">Don’t have an account? <a href="/register">Sign up here</a></p>
+            </form>
+        </div>
+    </div>
+
+<!-- Forgot Password Modal -->
+<div id="forgot-password-modal" class="modal">
+    <div class="modal-content">
+        <!-- Top Section: Outlined Lock Icon & Close Button -->
+        <div class="modal-header">
+            <i class="fa fa-unlock-alt lock-icon"></i> <!-- Outlined Lock Icon -->
+            <span class="close" id="close-forgot">&times;</span> <!-- Close Button -->
+        </div>
+
+        <!-- Move Text Above Both Form & Image -->
+        <h2 class="overlay-title">Forgot Password?</h2>
+        <p class="overlay-text">Please enter your email address to reset your password</p>
+
+        <!-- Modal Body -->
+        <div class="modal-body">
+            <!-- Left Section: Form -->
+            <div class="forgot-form-container">
+                <div class="input-group">
+                    <label class="static-label" for="email">DLSU Email</label>
+                    <input type="email" id="email" class="static-input" placeholder="example_name@dlsu.edu.ph">
+                </div>                                                                                                       
+
+                <button id="forgot-submit" class="submit-btn">Submit</button>
+                <a href="#" id="back-to-login" class="back-link">Back to Login</a>
+            </div>
+
+            <!-- Right Section: Image -->
+            <div class="forgot-image-container">
+                <img src="images/ForgotPassword.png" class="forgot-img">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="change-password-modal" class="modal">
+    <div class="modal-content">
+        <!-- Top Section: Lock Icon & Close Button -->
+        <div class="modal-header">
+            <i class="fa fa-lock lock-icon"></i>
+            <span class="close close-change-password">&times;</span>
+        </div>
+
+        <!-- Title & Description -->
+        <h2 class="overlay-title">Create New Password</h2>
+        <p class="overlay-text">Please enter and confirm your new password.</p>
+
+        <!-- Modal Body -->
+        <div class="modal-body change-password-body">
+            <form id="change-password-form">
+                <div class="input-group">
+                    <label class="static-label" for="new-password">New Password:</label>
+                    <input type="password" id="new-password" class="static-input" required>
+                </div> 
+                
+                <div class="input-group">
+                    <label class="static-label" for="confirm-password">Confirm Password:</label>
+                    <input type="password" id="confirm-password" class="static-input" required>
+                </div>   
+                <button type="submit" class="submit-btn change-submit-btn">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Incorrect Password Modal -->
+<div id="incorrect-password-modal" class="modal">
+    <div class="modal-content">
+        <h2 class="error-title">Invalid Inputs</h2>
+        <p class="error-message">Please Enter the Correct Following Inputs</p>
+        
+        <button id="close-incorrect" class="try-again-btn">Try Again</button>
+        <a href="#" id="forgot-password-link-modal" class="forgot-password-link">Forgot Password?</a>
+    </div>
+</div>
+
+<!-- External JavaScript -->
+<script src="js/loginJS.js"></script>
+</body>
+</html>

@@ -1,0 +1,857 @@
+body {
+  font-family: 'Outfit', sans-serif;
+  background: #f5f5f5;
+}
+
+/* ======= HEADER STYLES ======= */
+.header {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background-color: #377684;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+.labyrinthHeader {
+  font-family: "Odor Mean Chey", Helvetica, sans-serif;
+  font-size: 32px;
+  color: #ffffff;
+  text-align: center;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ======= PROFILE HEADER ======= */
+.profile-heading {
+  width: 100%;
+  height: 250px;
+  background: white;
+  border-bottom: 1px #EAECF0 solid;
+  display: flex;
+  flex-direction: column;
+}
+
+#cover-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.cover-content-container {
+  padding: 0px 40px;
+  display: flex;
+}
+
+.avatar-container {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 80px;
+}
+
+.profile-picture {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid #2D2D2D;
+}
+
+.text-container {
+  padding-left: 16px;
+  padding-top: 25px;
+  align-items: center;
+}
+
+.profile-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #101828;
+}
+
+.profile-type {
+  font-size: 14px;
+  color: #667085;
+  font-weight: 700;
+}
+
+/* ======= MAIN LAYOUT ======= */
+.dashboard-html {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.overlap {
+  display: flex;
+  flex-direction: row;
+  width: 95%;
+  margin-top: 20px;
+  gap: 20px;
+}
+
+/* ======= PROFILE DETAILS ======= */
+.user-details {
+  width: 35%;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-details {
+  background: white;  
+  border-radius: 10px;
+}
+
+.subsection-container {
+  align-items: center;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.subsection-title {
+  font-size: 16px;
+  color: #2D2D2D;
+  margin-bottom: 5px;
+}
+
+.subsection-content {
+  font-size: 14px;
+  color: #5B5B5B;
+  margin-bottom: 15px;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background: #EAECF0;
+  margin: 10px 0;
+}
+
+.button-container {
+  display: flex;
+  justify-content: right;
+  margin-top: 50px;
+}
+
+.edit-profile-button {
+  font-family: Newsreader;
+  background-color: #377684;
+  color: white;
+  padding: 8px 30px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.edit-profile-button:hover {
+  background-color: #28585F;
+}
+
+/* ======= RESERVATIONS TABLE ======= */
+.reservations {
+  margin-top: 20px;
+}
+
+.reservationContainer {
+  width: 100%;
+  max-height: 500px; /* Controls overall height */
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-y: auto; /* Enables scrolling inside the container */
+}
+
+.reservationHeader {
+  text-align: left;
+  font-size: 18px;
+  padding: 10px;
+  background: #2F6E77;
+  color: white;
+  border-radius: 5px 5px 0 0;
+}
+
+#currentReservationsTable,
+#recentReservationsTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Ensures uniform column width */
+}
+
+#currentReservationsTable th, 
+#currentReservationsTable td,
+#recentReservationsTable th, 
+#recentReservationsTable td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+  white-space: nowrap; /* Prevents text from wrapping */
+}
+
+#currentReservationsTable th,
+#recentReservationsTable th {
+  background: #377684;
+  color: white;
+  padding: 10px;
+  text-align: left;
+}
+
+#currentReservationsTable tbody tr:nth-child(even),
+#recentReservationsTable tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.edit-button {
+  background-color: #2F6E77;
+  color: white;
+  padding: 6px 30px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.edit-button:hover {
+  background-color: #1B4D5B;
+}
+
+/* CALENDAR */
+.calendarContainer {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* RESERVE NOW */
+.reserveContainer {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.classroomArt {
+  width: 100%;
+  max-width: 300px;
+}
+
+.reserveButton {
+  background-color: #377684;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.reserveButton:hover {
+  background-color: #28585F;
+}
+
+/* ============ MODAL OVERLAY ============ */
+
+/* Hide modal initially */
+#editProfileModal, #saveChangesModal {
+  display: none; /* Hide modal on page load */
+}
+
+/* Ensure modal appears when active */
+.modal.show {
+  display: flex !important;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ============ MODAL CONTENT ============ */
+.modal-content {
+  width: 50%;
+  background: white;
+  border-radius: 15px;
+  position: relative;
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+/* ============ CLOSE BUTTON ============ */
+.close {
+  position: absolute;
+  top: 10px; /* Adjust to position inside the modal */
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 2; /* Higher than the cover image */
+  padding: 5px 10px;
+  border-radius: 50%;
+}
+
+/* ============ HEADER STYLES ============ */
+.modal-header {
+  position: relative;
+  width: 100%;
+  height: 250px;
+}
+
+/* Cover Image */
+.modal-cover {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  position: relative; /* Ensures it stays behind other elements */
+  z-index: 0; /* Lower than the close button */
+}
+
+/* Profile Information Section */
+.profile-info {
+  display: flex;
+  align-items: center;
+  padding: 0px 40px;
+  position: relative;
+  top: -40px;
+}
+
+.modal-profile-container {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  align-items: left; /* Center-align the items */
+}
+
+.modal-profile-picture {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Name and Role */
+.profile-text {
+  margin-left: 15px; /* Moves name and role closer to the profile picture */
+  text-align: left;
+}
+
+.profile-text h3 {
+  margin: 10px 0 0 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: #2D2D2D;
+}
+
+.profile-text p {
+  margin: 0;
+  color: gray;
+  font-size: 14px;
+}
+
+/* Change Profile Photo Button */
+.change-photo-btn {
+  font-family: Newsreader;
+  display: block;
+  margin-top: 10px;  /* Reduced margin */
+  padding: 5px 15px;
+  font-size: 10px;
+  background: #377684;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  max-width: 150%; /* Ensure button width is auto-fit */
+  text-align: center;
+  align-self: center;
+}
+
+.change-photo-btn:hover {
+  background: #28585F;
+}
+
+.change-photo-button-container {
+  display: flex;
+  justify-content: center;
+}
+
+/* ============ MODAL BODY - PERSONAL INFORMATION ============ */
+.modal-body {
+  padding: 30px 65px;
+}
+
+/* Section Title */
+.section-title {
+  font-family: "Odor Mean Chey", Helvetica, sans-serif;
+  font-size: 18px;
+  text-align: left;
+  margin-bottom: 50px;
+  color:#2D2D2D;
+}
+
+/* Input Row for First & Last Name */
+.input-row {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  margin-bottom: 20px; 
+}
+
+/* Input Group */
+.input-group {
+  position: relative;
+  width: 100%;
+  font-family: outfit;
+  font-size: 14px;
+}
+
+.hidden-file-input {
+  display: none; /* Hide the default file input */
+}
+
+/* Static Label */
+.static-label {
+  position: absolute;
+  left: 14px;
+  top: -10px;
+  font-size: 14px;
+  color: #4F4F4F;
+  background: white;
+  padding: 0 5px;
+}
+
+/* Static Input */
+.static-input {
+  font-family: outfit;
+  width: 100%;
+  font-size: 14px;
+  border: 1px solid #898989;
+  border-radius: 10px;
+  outline: none;
+  height: 50px;
+  background: white;
+  padding-left: 15px;
+  margin-bottom: 10px;
+}
+
+/* Divider */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: #EAECF0;
+  margin: 20px 0;
+}
+
+.curved-divider {
+  position: relative;
+  width: 100%;
+  height: 40px; /* Adjusted height for better curvature */
+  background: #f5f5f5; /* Light gray to match modal background */
+  margin-bottom: -30px; /* Ensures smoother transition */
+  overflow: hidden;
+}
+
+/* Adding the curve */
+.curved-divider::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 15px;
+  width: 100%;
+  height: 40px;
+  background: white;
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.05);
+}
+
+
+
+/* ============ MODAL FOOTER - BUTTONS ============ */
+/* Buttons */
+.delete-btn {
+  font-family: Newsreader;
+  background: #900B09;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+  background-color: white;
+  color: #900B09;
+  border: 1px solid #900B09;
+}
+
+.password-btn {
+  font-family: Newsreader;
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: 1px solid #D1D5DB;
+  background: white;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.password-btn:hover {
+  background-color: #2D2D2D;
+  color: white;
+  border: 1px solid white;
+}
+
+.save-btn {
+  font-family: Newsreader;
+  padding: 8px 15px;
+  border-radius: 5px;
+  background-color: #2D2D2D;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  position: relative;
+  margin-left: 37%;
+}
+
+.save-btn:hover {
+  background-color: white;
+  color: #2D2D2D;
+  border: 1px solid #2D2D2D;
+}
+
+/* ============ Unsaved Changes Modal ============ */
+
+/* Confirmation Modal Styling */
+.unsaved-changes {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/* Save Icon Styling */
+.save-icon {
+  font-size: 24px;
+  color: black;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+
+/* Title */
+.unsaved-changes h2 {
+  text-align: left;
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/* Message */
+.unsaved-changes p {
+  font-size: 16px;
+  color: #656565;
+  margin: 10px 0 30px;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancel-btn, .go-home-btn {
+  width: 100%;
+  font-family: Newsreader;
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: 1px solid #D1D5DB;
+  background: white;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.go-home-btn{
+  margin-top: 20px;
+}
+
+.cancel-btn, .go-home-btn:hover {
+  background-color: #2D2D2D;
+  color: white;
+  border: 1px solid white;
+}
+
+.leave-btn {
+  width: 100%;
+  font-family: Newsreader;
+  background: #900B09;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.leave-btn:hover {
+  background-color: white;
+  color: #900B09;
+  border: 1px solid #900B09;
+}
+
+/* Close Button */
+.close-confirm {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* ============ DELETE PASSWORD? MODAL ============ */
+
+/* Confirmation Modal Styling */
+.account-deleted {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  width: 500px;
+  text-align: center;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.account-deleted h2 {
+  color: #900B09;
+  text-align: left;
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+/* Message */
+.account-deleted p {
+  text-align: left;
+  font-size: 16px;
+  color: #656565;
+  margin: 10px 0 30px;
+}
+
+/* Confirmation Modal Styling */
+.delete-account {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  width: 450px;
+  text-align: center;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.delete-account h2 {
+  color: #900B09;
+  text-align: left;
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+/* Message */
+.delete-account p {
+  text-align: left;
+  font-size: 16px;
+  color: #656565;
+  margin: 10px 0 30px;
+}
+
+.confirm-btn{
+  width: 100%;
+  font-family: Newsreader;
+  background: #900B09;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.confirm-btn:hover {
+  background-color: white;
+  color: #900B09;
+  border: 1px solid #900B09;
+}
+
+/* Delete Icon */
+.delete-icon {
+  font-size: 24px;
+  color: #900B09;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+
+/* ======= Change Password ======= */
+
+/* Confirmation Modal Styling */
+.change-password {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  width: 500px;
+  text-align: center;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.change-password h2 {
+  color:#2D2D2D;
+  text-align: left;
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+/* Message */
+.change-password p {
+  text-align: center;
+  font-size: 16px;
+  color: #656565;
+  margin: 10px 0 30px;
+}
+
+.lock-icon {
+  font-size: 24px;
+  color: #2D2D2D;
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  margin-bottom: 10px;
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  font-family: Newsreader;
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: 1px solid #D1D5DB;
+  background: white;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #2D2D2D;
+  color: white;
+  border: 1px solid white;
+}
+
+/* ======= Changes Successfully Saved ======= */
+
+.successfully-changed {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  width: 500px;
+  text-align: center;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.successfully-changed h2 {
+  color: #3B6B53;
+  text-align: left;
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+/* Message */
+.successfully-changed p {
+  text-align: left;
+  font-size: 16px;
+  color: #656565;
+  margin: 10px 0 30px;
+}
+
+.check-icon {
+  font-size: 24px;
+  color: #3B6B53;
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  margin-bottom: 10px;
+}
+
+/* Submit Button */
+.back-btn {
+  width: 100%;
+  font-family: Newsreader;
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: 1px solid #D1D5DB;
+  background: white;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #2D2D2D;
+  color: white;
+  border: 1px solid white;
+}
+
+/* Hide modals on page load */
+#editProfileModal,
+#saveChangesModal,
+#deleteAccountModal,
+#accountDeletedModal,
+#changePasswordModal,
+#successChangesModal {
+    display: none;
+}
+
+
