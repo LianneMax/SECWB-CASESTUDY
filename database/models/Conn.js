@@ -1,10 +1,10 @@
 // MongoDB Connection Script
 const mongoose = require('mongoose')
 
-const mongoURI = 'mongodb+srv://admin:HdWcIfrhJ7oG6baf@labyrinthcluster.xwg3l.mongodb.net/'
+const mongoURI = 'mongodb+srv://admin:ryHgtyPorVUmDrjz@cluster0.jurqfm5.mongodb.net/'
 
 
-// DB CONNECTION: mongodb+srv://admin:<db_password>@labyrinthcluster.xwg3l.mongodb.net/
+// DB CONNECTION: mongodb+srv://admin:ryHgtyPorVUmDrjz@cluster0.jurqfm5.mongodb.net/
 // mongoose.connect('mongodb://127.0.0.1:27017/labyrinthDB', { 
 function connectToDB() {
     mongoose.connect(mongoURI, { 

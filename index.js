@@ -228,6 +228,11 @@ async function getStudentsFromDB() {
     }
 }
 
+function isPasswordComplex(password) {
+    // Minimum 8 chars, at least 1 uppercase, 1 lowercase, 1 digit, 1 special char
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    return regex.test(password);
+}
 
 /*
     SHA256 hash generation
@@ -294,6 +299,17 @@ app.post('/register', async (req, res) => {
             });
         }
 
+        // Trim password before checking complexity
+        const trimmedPassword = password.trim();
+
+        // Enforce password complexity
+        if (!isPasswordComplex(trimmedPassword)) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+            });
+        }
+
         // Check for existing user BEFORE creating new one
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -304,7 +320,7 @@ app.post('/register', async (req, res) => {
         }
 
         // If no existing user, proceed with registration
-        const hashedPassword = sha256(password);
+        const hashedPassword = sha256(trimmedPassword);
         const newUser = new User({
             email,
             first_name,
@@ -452,6 +468,17 @@ app.post('/reset-password', async (req, res) => {
             });
         }
 
+        // Trim password before checking complexity
+        const trimmedPassword = password.trim();
+
+        // Enforce password complexity
+        if (!isPasswordComplex(trimmedPassword)) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+            });
+        }
+
         res.json({ 
             success: true, 
             message: "Password updated successfully" 
@@ -465,47 +492,63 @@ app.post('/reset-password', async (req, res) => {
 // Submit Login Credentials POST Route
 app.post("/login", express.urlencoded({ extended: true }), async (req, res) => {
     const { email, password, rememberMe } = req.body;
-
-    console.log("🔍 Attempting login with Email:", email);
-    console.log("🔍 Hashed Password:", sha256(password));
+    const MAX_ATTEMPTS = 5;
+    const LOCK_TIME = 15 * 60 * 1000; // 15 minutes
 
     try {
-        // Check if user exists
         const existingUser = await User.findOne({ email: email });
 
         if (!existingUser) {
-            console.warn("⚠️ User not found:", email);
             return res.status(401).json({ success: false, message: "User not found." });
         }
 
-        // Check if password matches
+        // Check if account is locked
+        if (existingUser.lockUntil && existingUser.lockUntil > Date.now()) {
+            const unlockDate = new Date(existingUser.lockUntil);
+            return res.status(403).json({
+                success: false,
+                message: `Account locked. Try again at ${unlockDate.toLocaleString()}.`,
+                lockUntil: unlockDate
+            });
+        }
+
+        // Check password
         if (existingUser.password !== sha256(password)) {
-            console.warn("⚠️ Incorrect password for:", email);
+            if ((existingUser.loginAttempts || 0) + 1 >= MAX_ATTEMPTS) {
+                // Lock account and reset attempts
+                await User.updateOne(
+                    { _id: existingUser._id },
+                    { $set: { lockUntil: Date.now() + LOCK_TIME, loginAttempts: 0 } }
+                );
+            } else {
+                // Just increment attempts
+                await User.updateOne(
+                    { _id: existingUser._id },
+                    { $inc: { loginAttempts: 1 } }
+                );
+            }
+
             return res.status(401).json({ success: false, message: "Invalid password." });
         }
 
-        console.log("✅ Signed in:", existingUser.email, "| Role:", existingUser.account_type);
-        req.session.user = existingUser; // Store user session
+        // Successful login: reset attempts and lock
+        await User.updateOne({ _id: existingUser._id }, { $set: { loginAttempts: 0, lockUntil: null } });
 
-        // Set "Remember Me" cookie if checked
+        req.session.user = existingUser;
         if (rememberMe) {
-            res.cookie("rememberMe", existingUser._id.toString(), { maxAge: 1814400000, httpOnly: true }); // 3 weeks
+            res.cookie("rememberMe", existingUser._id.toString(), { maxAge: 1814400000, httpOnly: true });
         }
-
         res.cookie("sessionId", req.sessionID);
 
-        // Role-based Redirection (ONLY Student & Lab Technician)
         let redirectUrl;
         if (existingUser.account_type === "Student") {
             redirectUrl = "/dashboard";
         } else if (existingUser.account_type === "Lab Technician") {
             redirectUrl = "/labtech";
         } else {
-            console.warn("⚠️ Unknown account type:", existingUser.account_type);
             return res.status(401).json({ success: false, message: "Invalid account type." });
         }
 
-        console.log(`🔀 Redirecting ${existingUser.email} to: ${redirectUrl}`);
         return res.json({ success: true, redirect: redirectUrl });
 
     } catch (err) {
@@ -601,6 +644,17 @@ app.post('/submit-profile-details', isAuthenticated, async (req, res) => {
 // Change password POST Route
 app.post('/changepassword', isAuthenticated, async (req, res) => {
     try {
+        // Trim password before checking complexity
+        const trimmedPassword = password.trim();
+
+        // Enforce password complexity
+        if (!isPasswordComplex(trimmedPassword)) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+            });
+        }
+
         const { newPassword, confirmPassword } = req.body;
         const user_id = req.session.user._id;
 
