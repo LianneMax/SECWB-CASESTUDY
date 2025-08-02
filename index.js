@@ -383,7 +383,7 @@ app.post('/register', async (req, res) => {
             user_id: savedUser._id,
             email: email,
             security_question,
-            security_answer: security_answer.toLowerCase()
+            security_answer: security_answer
         });
 
         await securityQuestionDoc.save();
@@ -480,7 +480,7 @@ app.post('/verify-security-answer', async (req, res) => {
             });
         }
 
-        if (securityQuestion.security_answer === answer.toLowerCase()) {
+        if (securityQuestion.security_answer === answer) {
             req.session.resetPasswordEmail = email;
             res.json({ success: true });
         } else {
