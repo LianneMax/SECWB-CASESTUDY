@@ -78,6 +78,15 @@ const isLabTech = (req, res, next) => {
     }
 }
 
+// Middleware to check if the user is Staff
+const isStaff = (req, res, next) => {
+    if (req.session.user && req.session.user.account_type === "Staff") {
+        next()
+    } else {
+        res.status(403).json({ message: "Access denied. Only Staff can perform this action." })
+    }
+}
+
 // Get Reservations Seat Availability
 app.get("/all-reservations", isAuthenticated, async (req, res) => {
     try {
@@ -620,6 +629,8 @@ app.post("/login", express.urlencoded({ extended: true }), async (req, res) => {
             redirectUrl = "/dashboard";
         } else if (existingUser.account_type === "Lab Technician") {
             redirectUrl = "/labtech";
+        } else if (existingUser.account_type === "Staff") {
+            redirectUrl = "/staff";
         } else {
             return res.status(401).json({ success: false, message: "Invalid account type." });
         }
@@ -818,7 +829,7 @@ app.post('/deleteaccount', isAuthenticated, async (req, res) => {
             email: user_email,
         });
 
-        console.log(`🗑️ Deleted ${deletedReservations.deletedCount} future reservations for user: ${user_email}`);
+        console.log(`🗑️ Deleted ${deletedReservations.deletedCount} future reservations for user: ${user.email}`);
         console.log(`🕒 Current session time: ${currentDate.toISOString()}`);
 
         // Find and delete the user
@@ -847,6 +858,14 @@ app.post('/deleteaccount', isAuthenticated, async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
+// Route to staff handlebar
+app.get('/staff', isAuthenticated, (req,res) => {
+    const userData = req.session.user
+    console.log(userData)
+
+    res.render('staff', {userData})
+})
 
 // Route to labtech handlebar
 app.get('/labtech', isAuthenticated, (req,res) => {
@@ -970,8 +989,12 @@ app.get('/dashboard', isAuthenticated, async(req,res) => {
 
     if(userData.account_type == "Student")
         res.render('dashboard', {userData})
-
-    else res.render('labtech', {userData})
+    else if(userData.account_type == "Lab Technician")
+        res.render('labtech', {userData})
+    else if(userData.account_type == "Staff")
+        res.render('staff', {userData})
+    else
+        res.redirect('/login')
 })
 
 // Create Reservation POST Route
