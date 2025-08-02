@@ -533,14 +533,18 @@ app.post("/login", express.urlencoded({ extended: true }), async (req, res) => {
 
         // Check password
         if (existingUser.password !== sha256(password)) {
+            // Update lastFailedLogin
+            await User.updateOne(
+                { _id: existingUser._id },
+                { $set: { lastFailedLogin: new Date() } }
+            );
+
             if ((existingUser.loginAttempts || 0) + 1 >= MAX_ATTEMPTS) {
-                // Lock account and reset attempts
                 await User.updateOne(
                     { _id: existingUser._id },
                     { $set: { lockUntil: Date.now() + LOCK_TIME, loginAttempts: 0 } }
                 );
             } else {
-                // Just increment attempts
                 await User.updateOne(
                     { _id: existingUser._id },
                     { $inc: { loginAttempts: 1 } }
@@ -550,8 +554,14 @@ app.post("/login", express.urlencoded({ extended: true }), async (req, res) => {
             return res.status(401).json({ success: false, message: "Invalid password." });
         }
 
-        // Successful login: reset attempts and lock
-        await User.updateOne({ _id: existingUser._id }, { $set: { loginAttempts: 0, lockUntil: null } });
+        // Successful login: reset attempts and lock, and update lastLogin
+        const previousLastLogin = existingUser.lastLogin;
+        const previousLastFailedLogin = existingUser.lastFailedLogin;
+
+        await User.updateOne(
+            { _id: existingUser._id },
+            { $set: { loginAttempts: 0, lockUntil: null, lastLogin: new Date() } }
+        );
 
         req.session.user = existingUser;
         if (rememberMe) {
@@ -568,7 +578,13 @@ app.post("/login", express.urlencoded({ extended: true }), async (req, res) => {
             return res.status(401).json({ success: false, message: "Invalid account type." });
         }
 
-        return res.json({ success: true, redirect: redirectUrl });
+        // Send last login info to frontend
+        return res.json({
+            success: true,
+            redirect: redirectUrl,
+            lastLogin: previousLastLogin,
+            lastFailedLogin: previousLastFailedLogin
+        });
 
     } catch (err) {
         console.error("❌ Error during login:", err);

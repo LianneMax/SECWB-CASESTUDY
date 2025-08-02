@@ -84,8 +84,19 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await response.json();
 
             if (data.success) {
-                console.log("✅ Login successful. Redirecting to:", data.redirect);
-                window.location.href = data.redirect;
+            // Display last login info if available
+            if (data.lastLogin || data.lastFailedLogin) {
+                let msg = "Welcome!";
+                if (data.lastLogin) {
+                    msg += `\nLast successful login: ${new Date(data.lastLogin).toLocaleString()}`;
+                }
+                if (data.lastFailedLogin) {
+                    msg += `\nLast failed login: ${new Date(data.lastFailedLogin).toLocaleString()}`;
+                }
+                alert(msg);
+            }
+            console.log("✅ Login successful. Redirecting to:", data.redirect);
+            window.location.href = data.redirect;
             } else {
                 console.warn("⚠️ Login failed:", data.message);
                 incorrectPasswordModal.open();
