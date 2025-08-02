@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard</title>
+    
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/styleguide.css">
+    <link rel="stylesheet" href="css/staffStyle.css">
+</head>
+
+<body>
+
+<!-- Header -->
+<header class="header">
+    <div class="logo-container">
+        <img src="images/LabyrinthLogo.png" alt="Labyrinth Logo" onclick="redirectToDashboard()">
+    </div>
+
+    <div class="labyrinthHeader">Labyrinth</div>
+
+    <!-- Profile Picture & Dropdown (Right-Aligned) -->
+    <div class="profile-dropdown">
+        <img class="profile-icon" src="{{userData.profile_picture}}" alt="Profile" id="profileDropdownBtn">
+        <div class="dropdown-menu" id="profileDropdown">
+            <a href="/profile">Go to Profile</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+</header>
+
+<!-- Main Dashboard Content -->
+<div class="Staff-html">
+    <div class="overlap">
+        <div class="left-side">
+            <h1 class="welcomeHeader">Welcome, {{userData.first_name}}</h1>
+            <p class="sloganHeader">Supporting Students Every Step of the Way</p>
+
+            <div class="reservations">
+                <div class="rectangle">
+                    <div class="reservationContainer">
+                        <table id="reservationsTable">
+                            <thead>
+                                <tr>
+                                    <th colspan="6" class="reservationHeader">All Recent Reservations</th>
+                                </tr>
+                                <tr>
+                                    <th>Room Number</th>
+                                    <th>Seat Number</th>
+                                    <th>Date</th>
+                                    <th>Time Slot</th>
+                                    <th>Reserved By</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#if reservations}}
+                                    {{#each reservations}}
+                                    <tr>
+                                        <td>{{this.room_num}}</td>
+                                        <td>{{this.seat_num}}</td>
+                                        <td>{{formatDate this.reserved_date}}</td>
+                                        <td>{{formatTime this.reserved_date}}</td>
+                                        <td>
+                                            {{#if (eq this.anonymous "Y")}}
+                                                Anonymous
+                                            {{else}}
+                                                {{this.reserved_for_email}}
+                                            {{/if}}
+                                        </td>
+                                        <td>
+                                            <button class="edit-btn" onclick="openEditModal('{{this._id}}', '{{this.room_num}}', {{this.seat_num}}, '{{this.reserved_date}}')">
+                                                Edit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {{/each}}
+                                {{else}}
+                                    <tr>
+                                        <td colspan="6" class="no-reservations">No reservations found</td>
+                                    </tr>
+                                {{/if}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side -->
+        <div class="right-side">
+            <div class="reserveContainer">
+                <div class="reserveLabSlot">
+                    <p class="ContainerText">For Student Walk-ins</p>
+                    <img class="classroomArt" src="images/IndexPhoto.png" />
+                    <button class="reserveButton" onclick="window.location.assign('/reserve')">Reserve Now!</button>
+                </div>
+            </div>
+
+            {{#if userData.account_type}}
+            <div class="staffInfo">
+                <div class="staffDetails">
+                    <h3>Staff Information</h3>
+                    <p><strong>Role:</strong> {{userData.account_type}}</p>
+                    <p><strong>Email:</strong> {{userData.email}}</p>
+                    <div class="accessLevel">
+                        <p><strong>Access Level:</strong> Edit Only</p>
+                        <small>You can modify reservation times and dates</small>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+<!-- Edit Overlay (Hidden by Default) -->
+<div class="edit-overlay">
+    <div class="edit-container">
+        <h2>EDIT RESERVATION</h2>
+
+        <!-- Date-Time Selection -->
+        <div class="date-time-container">
+            <!-- Date Picker -->
+            <div class="date-picker-container">
+                <label for="edit-date">Select Date:</label>
+                <input type="date" id="edit-date" required>
+            </div>
+
+            <!-- Time Picker -->
+            <div class="time-picker-container">
+                <label for="edit-time">Select Time:</label>
+                <select id="edit-time"></select>
+            </div>
+        </div>
+
+        <!-- Reservation Details -->
+        <div class="reservation-details">
+            <p id="edit-room"><strong>Room:</strong> Not Selected</p>
+            <p id="edit-seat"><strong>Seat:</strong> Not Selected</p>
+            <p id="edit-reserved-by"><strong>Reserved By:</strong> <span id="reserved-by-info"></span></p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-group">
+            <button class="saveButton" id="saveButton">Save Changes</button>
+            <button id="cancel-button" class="cancel-button">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script src="js/common.js"></script>
+<script src="js/staffJS.js"></script>
+
+</body>
+</html>

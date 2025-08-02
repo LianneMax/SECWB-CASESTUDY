@@ -29,6 +29,33 @@ var admin2 = {
     profile_picture: "profile_pics/default_avatar.jpg",
 }
 
+// Sample Staff Accounts
+var staff1 = {
+    last_name: "Rodriguez",
+    first_name: "Maria",
+    email: "maria_rodriguez@dlsu.edu.ph",
+    password: "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8", // actual password: "password"
+    account_type: "Staff",
+    profile_picture: "profile_pics/default_avatar.jpg",
+}
+
+var staff2 = {
+    last_name: "Santos",
+    first_name: "Jose",
+    email: "jose_santos@dlsu.edu.ph",
+    password: "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f", // actual password: "password123"
+    account_type: "Staff",
+    profile_picture: "profile_pics/default_avatar.jpg",
+}
+
+var staff3 = {
+    last_name: "Garcia",
+    first_name: "Ana",
+    email: "ana_garcia@dlsu.edu.ph",
+    password: "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3", // actual password: "hello"
+    account_type: "Staff",
+}
+
 // Sample Student Accounts
 var student1 = {
     last_name: "Ang",
