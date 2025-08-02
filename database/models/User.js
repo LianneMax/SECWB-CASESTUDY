@@ -13,7 +13,10 @@ const UserSchema = new mongoose.Schema({
     profile_picture: { type: String },
 
     loginAttempts: { type: Number, default: 0 },
-    lockUntil: { type: Date }
+    lockUntil: { type: Date },
+
+    lastLogin: { type: Date },
+    lastFailedLogin: { type: Date }
 });
 
 // Set `email` as the primary key by overriding `_id`
