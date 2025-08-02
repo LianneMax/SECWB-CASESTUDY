@@ -47,6 +47,8 @@
   background: #ffffff;
   border-radius: 24px;
   padding: 20px;
+  align-content: center;
+  height: 63%;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
 }
@@ -242,7 +244,6 @@
   padding-bottom: 15px;
   color: #595858;
   font-weight: bold;
-  text-align: center;
 }
 
 /* Input & Select Styles */
@@ -549,4 +550,159 @@
 .confirm-button:hover {
   background-color: #5a2d7d;
   color: white;
+}
+
+/* Update your existing .reservationContainer styles with these changes */
+.reservationContainer {
+    max-height: 50vh; /* 50% of viewport height */
+    min-height: 200px; /* Minimum height */
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative; /* Important for sticky positioning */
+}
+
+/* Table styling for sticky header */
+.reservationContainer table {
+    font-family: "Outfit";
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+/* Sticky header styles */
+.reservationContainer thead th {
+    position: sticky;
+    top: 0;
+    background-color: #7440a5;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+    z-index: 10; /* Ensures header stays above scrolling content */
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* Adds shadow below sticky header */
+}
+
+/* Special styling for the main header row that spans all columns */
+.reservationContainer .reservationHeader {
+    position: sticky;
+    top: 0;
+    background-color: #7440a5 !important;
+    color: white !important;
+    text-align: center !important;
+    font-size: 1.1em;
+    padding: 15px !important;
+    z-index: 11; /* Higher than regular headers */
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+}
+
+/* Regular table body cells */
+.reservationContainer td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+    background: white; /* Ensures content has background when scrolling under header */
+}
+
+.reservationContainer td:last-child {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Hover effect for table rows */
+.reservationContainer tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Custom scrollbar styling */
+.reservationContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+.reservationContainer::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.reservationContainer::-webkit-scrollbar-thumb {
+    background: #7440a5;
+    border-radius: 4px;
+}
+
+.reservationContainer::-webkit-scrollbar-thumb:hover {
+    background: #5a2d7d;
+}
+
+/* For Firefox */
+.reservationContainer {
+    scrollbar-width: thin;
+    scrollbar-color: #7440a5 #f1f1f1;
+}
+
+/* Simpler approach - treat entire thead as one sticky block */
+.reservationContainer {
+    max-height: 50vh;
+    min-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Make entire thead sticky as one unit */
+.reservationContainer thead {
+    position: sticky;
+    top: 0;
+    background-color: #7440a5;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Style the "All Recent Reservations" header */
+.reservationContainer .reservationHeader {
+    background-color: #7440a5 !important;
+    color: white !important;
+    text-align: center !important;
+    font-size: 1.1em;
+    padding: 15px !important;
+    border: 1px solid #5a2d7d !important;
+}
+
+/* Style the column headers */
+.reservationContainer thead th:not(.reservationHeader) {
+    background-color: #7440a5;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #5a2d7d;
+    font-weight: 600;
+}
+
+/* Rest of the table styling */
+.reservationContainer table {
+    font-family: "Outfit";
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.reservationContainer tbody td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+    background: white;
+}
+
+.reservationContainer tbody td:last-child {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.reservationContainer tbody tr:hover {
+    background-color: #f8f9fa;
 }
