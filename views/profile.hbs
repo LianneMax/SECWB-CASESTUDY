@@ -200,25 +200,25 @@
 </div>
 
 <!-- Delete Account Confirmation Modal -->
-<div id="deleteAccountModal" class="modal">
-    <div class="delete-account">
-
-        <!-- Delete Icon -->
-        <div class="delete-icon">
-            <i class="fa-solid fa-trash-can"></i>
-        </div>
-
-        <!-- Title & Message -->
-        <h2>Are you sure you want to delete your account?</h2>
-        <p>This action is permanent.<br><br>You will need to register a new account to reserve lab slots.</p>
-
-        <!-- Buttons -->
-        <div class="button-group">
-            <button id="cancelDeleteBtn" class="cancel-btn">Cancel</button>
-            <button id="confirmDeleteBtn" class="confirm-btn">Confirm</button>
+<form action="/deleteaccount" method="post" id="deleteAccountForm">
+    <div id="deleteAccountModal" class="modal">
+        <div class="delete-account">
+            <div class="delete-icon">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h2>Are you sure you want to delete your account?</h2>
+            <p>This action is permanent.<br><br>You will need to register a new account to reserve lab slots.</p>
+            <div class="input-group">
+                <label class="static-label" for="delete-current-password">Current Password:</label>
+                <input type="password" id="delete-current-password" name="currentPassword" class="static-input" required>
+            </div>
+            <div class="button-group">
+                <button id="cancelDeleteBtn" type="button" class="cancel-btn">Cancel</button>
+                <button id="confirmDeleteBtn" type="submit" class="confirm-btn">Confirm</button>
+            </div>
         </div>
     </div>
-</div>
+</form>
 
 <!-- Account Successfully Deleted Modal -->
 <div id="accountDeletedModal" class="modal">
@@ -250,9 +250,14 @@
 
             <!-- Title & Description -->
             <h2>Create New Password</h2>
-            <p>Please enter and confirm your new password.</p>
+            <p>Please enter your current password and the new password.</p>
 
             <!-- Input Fields -->
+            <div class="input-group">
+                <label class="static-label" for="current-password">Current Password:</label>
+                <input type="password" id="current-password" name="currentPassword" class="static-input" required>
+            </div>
+
             <div class="input-group">
                 <label class="static-label" for="new-password">New Password:</label>
                 <input type="password" id="new-password" name="newPassword" class="static-input" required>

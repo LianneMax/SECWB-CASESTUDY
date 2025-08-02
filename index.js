@@ -663,8 +663,15 @@ app.post('/submit-profile-details', isAuthenticated, async (req, res) => {
 // Change password POST Route
 app.post('/changepassword', isAuthenticated, async (req, res) => {
     try {
-        const { newPassword, confirmPassword } = req.body;
+        const { currentPassword, newPassword, confirmPassword } = req.body;
         const user_id = req.session.user._id;
+
+        const user = await User.findById(user_id);
+
+        // Re-authenticate
+        if (user.password !== sha256(currentPassword)) {
+            return res.status(400).send("<script>alert('Current password is incorrect!'); window.location='/profile';</script>");
+        }
 
         // Trim and check complexity
         const trimmedPassword = newPassword.trim();
@@ -681,7 +688,6 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
         }
 
         // Prevent password re-use
-        const user = await User.findById(user_id);
         const hashedPassword = sha256(trimmedPassword);
         if (user.password === hashedPassword) {
             return res.status(400).send("<script>alert('New password cannot be the same as the old password!'); window.location='/profile';</script>");
@@ -717,10 +723,17 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
 });
 
 // Delete User Account Route
-app.delete('/deleteaccount', isAuthenticated, async (req, res) => {
+app.post('/deleteaccount', isAuthenticated, async (req, res) => {
     try {
         const user_id = req.session.user._id;
-        const user_email = req.session.user.email;
+        const { currentPassword } = req.body;
+
+        const user = await User.findById(user_id);
+
+        // Re-authenticate
+        if (user.password !== sha256(currentPassword)) {
+            return res.status(400).send("<script>alert('Incorrect password inputted!'); window.location='/profile';</script>");
+        }
 
         // Delete all future reservations associated with the user
         const currentDate = new Date();
