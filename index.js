@@ -315,6 +315,7 @@ app.post('/register', async (req, res) => {
             });
         }
 
+        // Validate field lengths
         if (first_name.length > 25) {
             return res.status(400).json({ success: false, message: "First name must be at most 25 characters." });
         }
@@ -323,6 +324,10 @@ app.post('/register', async (req, res) => {
         }
         if (security_answer.length > 50) {
             return res.status(400).json({ success: false, message: "Security answer must be at most 50 characters." });
+        }
+        const emailLocalPart = email.split('@')[0];
+        if (emailLocalPart.length > 64) {
+            return res.status(400).json({ success: false, message: "Email local part must be at most 64 characters." });
         }
 
         // Check if email contains @dlsu.edu.ph
