@@ -453,7 +453,25 @@ app.post('/verify-security-answer', async (req, res) => {
 app.post('/reset-password', async (req, res) => {
     try {
         const { email, newPassword } = req.body;
-        const hashedPassword = sha256(newPassword);
+        const trimmedPassword = newPassword.trim();
+
+        // Enforce password complexity
+        if (!isPasswordComplex(trimmedPassword)) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+            });
+        }
+
+        // Prevent password re-use
+        const user = await User.findOne({ email });
+        const hashedPassword = sha256(trimmedPassword);
+        if (user && user.password === hashedPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "New password cannot be the same as the old password."
+            });
+        }
 
         const updatedUser = await User.findOneAndUpdate(
             { email },
@@ -465,17 +483,6 @@ app.post('/reset-password', async (req, res) => {
             return res.status(404).json({ 
                 success: false, 
                 message: "User not found" 
-            });
-        }
-
-        // Trim password before checking complexity
-        const trimmedPassword = password.trim();
-
-        // Enforce password complexity
-        if (!isPasswordComplex(trimmedPassword)) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
             });
         }
 
@@ -644,10 +651,11 @@ app.post('/submit-profile-details', isAuthenticated, async (req, res) => {
 // Change password POST Route
 app.post('/changepassword', isAuthenticated, async (req, res) => {
     try {
-        // Trim password before checking complexity
-        const trimmedPassword = password.trim();
+        const { newPassword, confirmPassword } = req.body;
+        const user_id = req.session.user._id;
 
-        // Enforce password complexity
+        // Trim and check complexity
+        const trimmedPassword = newPassword.trim();
         if (!isPasswordComplex(trimmedPassword)) {
             return res.status(400).json({
                 success: false,
@@ -655,16 +663,17 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
             });
         }
 
-        const { newPassword, confirmPassword } = req.body;
-        const user_id = req.session.user._id;
-
         // Check if passwords match
         if (newPassword !== confirmPassword) {
             return res.status(400).send("<script>alert('Passwords do not match!'); window.location='/profile';</script>");
         }
 
-        // Hash new password
-        const hashedPassword = sha256(newPassword);
+        // Prevent password re-use
+        const user = await User.findById(user_id);
+        const hashedPassword = sha256(trimmedPassword);
+        if (user.password === hashedPassword) {
+            return res.status(400).send("<script>alert('New password cannot be the same as the old password!'); window.location='/profile';</script>");
+        }
 
         // Update password in the database
         await User.findByIdAndUpdate(user_id, { password: hashedPassword });
@@ -677,11 +686,8 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
                 console.error("⚠️ Error logging out after password change:", err);
                 return res.status(500).send("<script>alert('Error logging out. Please try again.'); window.location='/profile';</script>");
             }
-
-            // Clear session-related cookies
             res.clearCookie("sessionId");
             res.clearCookie("rememberMe");
-
         });
 
     } catch (err) {
