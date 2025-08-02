@@ -463,8 +463,15 @@ app.post('/reset-password', async (req, res) => {
             });
         }
 
-        // Prevent password re-use
         const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "User not found" 
+            });
+        }
+
+        // Prevent password re-use
         const hashedPassword = sha256(trimmedPassword);
         if (user && user.password === hashedPassword) {
             return res.status(400).json({
@@ -473,18 +480,23 @@ app.post('/reset-password', async (req, res) => {
             });
         }
 
-        const updatedUser = await User.findOneAndUpdate(
-            { email },
-            { password: hashedPassword },
-            { new: true }
-        );
-
-        if (!updatedUser) {
-            return res.status(404).json({ 
-                success: false, 
-                message: "User not found" 
+        // Enforce password age (1 day)
+        const now = new Date();
+        const lastChanged = user.passwordLastChanged || user.createdAt || user._id.getTimestamp();
+        const oneDay = 24 * 60 * 60 * 1000;
+        if (now - lastChanged < oneDay) {
+            return res.status(400).json({
+                success: false,
+                message: "You can only change your password once every 24 hours."
             });
         }
+
+        // Update password and last changed date
+        const updatedUser = await User.findOneAndUpdate(
+            { email },
+            { password: hashedPassword, passwordLastChanged: now },
+            { new: true }
+        );
 
         res.json({ 
             success: true, 
@@ -675,8 +687,16 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
             return res.status(400).send("<script>alert('New password cannot be the same as the old password!'); window.location='/profile';</script>");
         }
 
-        // Update password in the database
-        await User.findByIdAndUpdate(user_id, { password: hashedPassword });
+        // Enforce password age (1 day)
+        const now = new Date();
+        const lastChanged = user.passwordLastChanged || user.createdAt || user._id.getTimestamp();
+        const oneDay = 24 * 60 * 60 * 1000;
+        if (now - lastChanged < oneDay) {
+            return res.status(400).send("<script>alert('You can only change your password once every 24 hours.'); window.location='/profile';</script>");
+        }
+
+        // Update password and passwordLastChanged
+        await User.findByIdAndUpdate(user_id, { password: hashedPassword, passwordLastChanged: now });
 
         console.log(`✅ Password updated for user: ${req.session.user.email}`);
 
