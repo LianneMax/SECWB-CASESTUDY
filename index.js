@@ -17,6 +17,18 @@ const Building = require("./database/models/Building.js")
 const Room = require("./database/models/Room")
 const Reservation = require("./database/models/Reservation")
 const SecurityQuestion = require('./database/models/SecurityQuestion');
+const SECURITY_QUESTIONS = [
+    "What was the name of your first stuffed animal?",
+    "What is the name of the street you grew up on?",
+    "What was your childhood nickname?",
+    "What is the name of your favorite childhood friend?",
+    "What was the make and model of your first car?",
+    "What is the name of the hospital where you were born?",
+    "What was your dream job as a child?",
+    "What is the middle name of your oldest sibling?",
+    "What is the name of your favorite teacher?",
+    "What is the title of the first movie you saw in a theater?"
+];
 const path = require('path')
 
 const app = express()
