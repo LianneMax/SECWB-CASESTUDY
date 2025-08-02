@@ -1,0 +1,552 @@
+.Staff-html {
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.header{
+  background-color: #7440a5 !important; 
+}
+
+.overlap {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 20px;
+}
+
+.left-side {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.welcomeHeader {
+  font-family: "Odor Mean Chey";
+  font-weight: 400;
+  color: #7440a5;
+  font-size: 48px;
+  padding-left: 2%;
+}
+
+.sloganHeader {
+  font-family: "Newsreader";
+  font-weight: 400;
+  color: #7440a5;
+  font-size: 24px;
+  padding-left: 2%;
+}
+
+.reservations {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.reservationContainer table {
+  font-family: "Outfit";
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.reservationContainer th, .reservationContainer td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.reservationContainer td:last-child {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.reservationContainer th {
+  background-color: #7440a5;
+  color: white;
+}
+
+.right-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Calendar Container */
+.calendarContainer {
+  width: 100%;
+  max-width: 400px;
+  height: 120px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.reserveContainer {
+  width: 100%;
+  max-width: 400px;
+  height: 360px;
+  background: #7440a5;
+  border-radius: 24px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s ease-in-out; /* Smooth transition */
+}
+
+/* Reserve Button */
+.reserveLabSlot {
+  position: relative;
+  text-align: center;
+}
+
+.reserveLabSlot .ContainerText {
+  font-family: Newsreader;
+  font-weight: 400;
+  color: #ffffff;
+  font-size: 24px;
+  letter-spacing: -0.48px;
+  margin-bottom: 20px;
+}
+
+.reserveLabSlot .classroomArt {
+  max-width: 65%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.reserveButton {
+  font-family: Newsreader;
+  padding: 10px 120px;
+  border-radius: 5px;
+  background-color: #2D2D2D;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  position: relative;
+}
+
+.reserveButton:hover {
+  background-color: #cccccc;
+  color: black;
+}
+
+
+/* Pop Effect on Hover */
+.reserveContainer:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Button Container */
+.button-container {
+  display: flex;
+  justify-content: center; /* Centers buttons horizontally */
+  gap: 10px; /* Adds space between buttons */
+}
+
+/* Style for Edit and Delete Buttons */
+.editButton, .deleteButton {
+
+  padding: 10px 60px;
+  font-family: "Newsreader", serif; 
+  font-size: 16px;
+  text-align: center;
+  border-radius: 5px;
+  background-color: #2D2D2D;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Edit Button */
+.editButton {
+  background-color: #2D2D2D;
+  color: white;
+}
+
+.editButton:hover {
+  background-color: white;
+  color: #2D2D2D;
+  border: 1px solid #2D2D2D;
+}
+
+/* Delete Button */
+.deleteButton {
+  background-color: #900B09;
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: white;
+  color: #900B09;
+  border: 1px solid #900B09;
+}
+
+.classroomArt {
+  max-width: 65%;
+  height: auto;
+  border-radius: 10px;
+}
+
+/* ------------------------- Edit Overlay Styles ------------------------- */
+.edit-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+  opacity: 0;
+  z-index: 1000;
+}
+
+.edit-overlay.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+.edit-container {
+  background: white;
+  border-radius: 10px;
+  width: 750px;
+  max-width: 90%;
+  padding: 40px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Title Styling */
+.edit-container h2 {
+  font-size: 24px;
+  font-family: 'Outfit', sans-serif;
+  padding-bottom: 15px;
+  color: #595858;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Input & Select Styles */
+.edit-container label {
+  display: block;
+  font-size: 16px;
+  font-family: outfit;
+  color: #595858;
+  text-align: left;
+  margin-bottom: 5px;
+  width: 100%;
+}
+
+/* Date-Time Container */
+.date-time-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+}
+
+/* Individual Input Box */
+.date-picker-container,
+.time-picker-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 10px;
+}
+
+/* Calendar (Date Picker) Styling */
+.date-picker-container input,
+.time-picker-container select {
+  width: 100%;
+  padding: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: white;
+  color: black;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* Calendar (Date Picker) Focus Effect */
+.date-picker-container input:focus,
+.time-picker-container select:focus {
+  border-color: #7440a5;
+  outline: none;
+}
+
+/* Reservation Details */
+.reservation-details {
+  font-family: outfit;
+  margin-top: 10px;
+  padding: 1rem;
+  border: 1px solid #ccc; /* Light gray border */
+  border-radius: 8px; /* Rounded corners */
+  color: #595858;
+  text-align: center;
+  width: 100%;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Adds subtle shadow */
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.button-group button {
+  font-family: "Outfit", sans-serif;
+  width: 150px; 
+  height: 45px; 
+  padding: 10px;
+  background: white;
+  color: #3C4B5F; 
+  font-size: 14px;
+  border: 1px solid #D1D5DB; 
+  border-radius: 5px; 
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+#saveButton:hover {
+  background: #5a2d7d; /* Darker purple on hover */
+  color: white;
+}
+
+/* Staff Info Container */
+.staffInfo {
+  width: 100%;
+  max-width: 400px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.staffDetails h3 {
+  color: #7440a5;
+  font-family: "Outfit", sans-serif;
+  font-size: 20px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.staffDetails p {
+  font-family: "Outfit", sans-serif;
+  color: #595858;
+  margin-bottom: 8px;
+}
+
+.accessLevel {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-left: 4px solid #7440a5;
+  border-radius: 4px;
+}
+
+.accessLevel small {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Edit button in table */
+.edit-btn {
+  background-color: #7440a5;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Outfit", sans-serif;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.edit-btn:hover {
+  background-color: #5a2d7d;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .edit-container {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+
+  .date-time-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+/*----------------------------------------------------------------*/
+
+/* Delete Modal Overlay */
+.delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* Active state */
+.delete-modal-overlay.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Delete Modal */
+.delete-modal {
+  background: white;
+  width: 500px;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  font-family: "Outfit", sans-serif;
+  position: relative;
+}
+
+/* Header with Trash Icon */
+.delete-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.delete-icon {
+  width: 30px;
+  height: auto;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* Modal Title */
+.delete-modal h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #900B09;
+  margin-top: 10px;
+  text-align: Left;
+}
+
+/* Delete Details */
+.delete-details {
+  text-align: left;
+  margin-top: 10px;
+}
+
+.delete-warning {
+  font-weight: 500;
+  color: #900B09;
+}
+
+/* Button Styling */
+.delete-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.deleteCancel-button {
+  font-family: outfit;
+  width: 45%;
+  margin-bottom: 5px; 
+  padding: 10px;
+  background: white;
+  color: #3C4B5F; /* Dark text color */
+  font-size: 16px;
+  border: 1px solid #D1D5DB; /* Light gray border */
+  border-radius: 10px; /* Rounded corners */
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.deleteCancel-button:hover {
+  background-color: #900B09;
+  color: white;
+}
+
+.cancel-button {
+  font-family: outfit;
+  width: 45%;
+  margin-bottom: 5px; 
+  padding: 10px;
+  background: white;
+  color: #3C4B5F; /* Dark text color */
+  font-size: 16px;
+  border: 1px solid #D1D5DB; /* Light gray border */
+  border-radius: 10px; /* Rounded corners */
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.cancel-button:hover {
+  background-color: #900B09;
+  color: white;
+}
+
+.confirm-button {
+  font-family: outfit;
+  width: 45%;
+  margin-bottom: 5px; 
+  padding: 10px;
+  background: white;
+  color: #3C4B5F; /* Dark text color */
+  font-size: 16px;
+  border: 1px solid #D1D5DB; /* Light gray border */
+  border-radius: 10px; /* Rounded corners */
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.confirm-button:hover {
+  background-color: #5a2d7d;
+  color: white;
+}

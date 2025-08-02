@@ -55,32 +55,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {{#if reservations}}
-                                    {{#each reservations}}
-                                    <tr>
-                                        <td>{{this.room_num}}</td>
-                                        <td>{{this.seat_num}}</td>
-                                        <td>{{formatDate this.reserved_date}}</td>
-                                        <td>{{formatTime this.reserved_date}}</td>
-                                        <td>
-                                            {{#if (eq this.anonymous "Y")}}
-                                                Anonymous
-                                            {{else}}
-                                                {{this.reserved_for_email}}
-                                            {{/if}}
-                                        </td>
-                                        <td>
-                                            <button class="edit-btn" onclick="openEditModal('{{this._id}}', '{{this.room_num}}', {{this.seat_num}}, '{{this.reserved_date}}')">
-                                                Edit
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {{/each}}
-                                {{else}}
-                                    <tr>
-                                        <td colspan="6" class="no-reservations">No reservations found</td>
-                                    </tr>
-                                {{/if}}
+                                <!-- Reservations will be populated by JavaScript -->
                             </tbody>
                         </table>
                     </div>
@@ -131,7 +106,9 @@
             <!-- Time Picker -->
             <div class="time-picker-container">
                 <label for="edit-time">Select Time:</label>
-                <select id="edit-time"></select>
+                <select id="edit-time">
+                    <!-- Time options will be populated by JavaScript -->
+                </select>
             </div>
         </div>
 

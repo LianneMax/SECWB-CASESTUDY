@@ -205,6 +205,58 @@ app.delete('/reservations/:id', isAuthenticated, async (req, res) => {
     }
 });
 
+// Staff Dashboard Table Data (Add this route to your server.js)
+app.get("/staff-reservations", isStaff, async (req, res) => {
+    try {
+        const reservations = await Reservation.find().lean();
+
+        if (!reservations || reservations.length === 0) {
+            console.warn("⚠️ No reservations found in the database.");
+            return res.json([]);
+        }
+
+        // Collect all possible emails: reserving user + reserved_for_email
+        const allEmails = reservations.flatMap(res => {
+            const emails = [];
+            if (res.email) emails.push(res.email);
+            if (res.reserved_for_email) emails.push(res.reserved_for_email);
+            return emails;
+        });
+
+        const uniqueEmails = [...new Set(allEmails)];
+
+        const users = await User.find(
+            { email: { $in: uniqueEmails } },
+            "first_name last_name email"
+        ).lean();
+
+        // Create a map for quick lookup
+        const userMap = {};
+        users.forEach(user => {
+            userMap[user.email] = `${user.first_name} ${user.last_name}`;
+        });
+
+        // Format the reservations with user data
+        const formattedReservations = reservations.map(reservation => ({
+            id: reservation._id,
+            roomNumber: reservation.room_num || "N/A",
+            seatNumber: `Seat #${reservation.seat_num}` || "N/A",
+            date: reservation.reserved_date ? reservation.reserved_date.toISOString().split("T")[0] : "N/A",
+            time: reservation.reserved_date ? reservation.reserved_date.toISOString().split("T")[1].slice(0, 5) : "N/A",
+            reservedBy:
+                reservation.anonymous === "Y"
+                    ? "Anonymous"
+                    : userMap[reservation.reserved_for_email] // ✅ Use reserved_for_email if available
+                        || userMap[reservation.email]          // fallback to email if not
+                        || "⚠️ Unknown"
+        }));
+
+        res.json(formattedReservations);
+    } catch (err) {
+        console.error("⚠️ Error fetching reservations:", err);
+        res.status(500).json({ message: "Error fetching reservations", error: err.message });
+    }
+});
 
 
 // Student Dashboard Table Data
