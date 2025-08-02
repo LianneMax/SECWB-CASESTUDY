@@ -344,6 +344,13 @@ app.post('/register', async (req, res) => {
 
         const savedUser = await newUser.save();
 
+        if (!SECURITY_QUESTIONS.includes(security_question)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid security question selected."
+            });
+        }
+
         // Create security question document
         const securityQuestionDoc = new SecurityQuestion({
             user_id: savedUser._id,
