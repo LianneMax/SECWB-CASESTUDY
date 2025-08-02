@@ -50,7 +50,7 @@
                                         <th>Seat Number</th>
                                         <th>Date</th>
                                         <th>Time Slot</th>
-                                        <th>Edit</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -85,6 +85,31 @@
 
 
             
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Overlay -->
+<div class="delete-modal-overlay" id="deleteModal">
+    <div class="delete-modal">
+        <div class="delete-header">
+            <img src="images/trashIcon.png" alt="Trash Icon" class="delete-icon">
+            <button class="close-button">&times;</button>
+        </div>
+        <h2>Are you sure you want to delete this Reservation?</h2>
+        <div class="delete-details">
+            <p><strong>Room:</strong> <span id="deleteRoom"></span></p>
+            <p><strong>Seat:</strong> <span id="deleteSeat"></span></p>
+            <p><strong>Date:</strong> <span id="deleteDate"></span></p>
+            <p><strong>Time Slot:</strong> <span id="deleteTime"></span></p>
+            <p><strong>Reserved By:</strong> <span id="deleteReservedBy"></span></p>
+            <br>
+            <p class="delete-warning">This action is permanent.</p>
+            <p>You will need to create a new reservation once this is deleted.</p>
+        </div>
+        <div class="delete-buttons">
+            <button class="deleteCancel-button">Cancel</button>
+            <button class="confirm-button">Confirm</button>
         </div>
     </div>
 </div>

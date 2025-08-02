@@ -61,6 +61,7 @@ app.use(cookieParser())
 var bodyParser = require('body-parser')
 app.use( bodyParser.urlencoded({extended: false}) )
 
+// Middleware to check if the user is authenticated
 const isAuthenticated = (req, res, next) => {
     if(req.session.user)
         next()
@@ -164,17 +165,28 @@ app.get("/reservations", isLabTech, async (req, res) => {
     }
 });
 
-// LabTech Dashboard Deletion Feature Route
-app.delete('/reservations/:id', isLabTech, async (req, res) => {
+// LabTech & User Dashboard Deletion Feature Route
+app.delete('/reservations/:id', isAuthenticated, async (req, res) => {
     try {
         const reservationId = req.params.id;
+        const user = req.session.user;
 
-        // Find and delete reservation
-        const deletedReservation = await Reservation.findByIdAndDelete(reservationId);
+        // Find the reservation
+        const reservation = await Reservation.findById(reservationId);
 
-        if (!deletedReservation) {
+        if (!reservation) {
             return res.status(404).json({ message: "Reservation not found" });
         }
+
+        // Allow if Lab Technician or reservation owner
+        const isLabTech = user.account_type === "Lab Technician";
+        const isOwner = reservation.reserved_for_email === user.email;
+
+        if (!isLabTech && !isOwner) {
+            return res.status(403).json({ message: "You are not authorized to delete this reservation." });
+        }
+
+        await Reservation.findByIdAndDelete(reservationId);
 
         console.log(`✅ Reservation ${reservationId} deleted successfully`);
         res.status(200).json({ message: "Reservation deleted successfully" });
