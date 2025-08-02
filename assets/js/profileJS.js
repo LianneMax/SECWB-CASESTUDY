@@ -178,9 +178,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (saveChangesBtn) {
-        saveChangesBtn.addEventListener("click", function () {
-            hideModal(editProfileModal);
-            showModal(successChangesModal);
+        saveChangesBtn.addEventListener("click", async function () {
+            const first_name = document.getElementById("first_name").value;
+            const last_name = document.getElementById("last_name").value;
+            const description = document.getElementById("description").value;
+
+            try {
+                const response = await fetch("/submit-profile-details", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ first_name, last_name, description })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    hideModal(editProfileModal);
+                    showModal(successChangesModal);
+                } else {
+                    alert("Error updating profile: " + (data.message || "Unknown error."));
+                }
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                alert("An error occurred. Please try again.");
+            }
         });
     }
 

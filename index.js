@@ -315,6 +315,16 @@ app.post('/register', async (req, res) => {
             });
         }
 
+        if (first_name.length > 25) {
+            return res.status(400).json({ success: false, message: "First name must be at most 25 characters." });
+        }
+        if (last_name.length > 25) {
+            return res.status(400).json({ success: false, message: "Last name must be at most 25 characters." });
+        }
+        if (security_answer.length > 50) {
+            return res.status(400).json({ success: false, message: "Security answer must be at most 50 characters." });
+        }
+
         // Check if email contains @dlsu.edu.ph
         if (!email.endsWith("@dlsu.edu.ph")) {
             return res.status(400).json({
@@ -685,6 +695,16 @@ app.post('/submit-profile-details', isAuthenticated, async (req, res) => {
     try {
         const userData = req.session.user;
         const { first_name, last_name, description } = req.body;
+
+        if (first_name && first_name.length > 25) {
+            return res.status(400).send("<script>alert('First name must be at most 25 characters.'); window.location='/profile';</script>");
+        }
+        if (last_name && last_name.length > 25) {
+            return res.status(400).send("<script>alert('Last name must be at most 25 characters.'); window.location='/profile';</script>");
+        }
+        if (description && description.length > 50) {
+            return res.status(400).send("<script>alert('Description must be at most 50 characters.'); window.location='/profile';</script>");
+        }
 
         const updatedData = {};
         if (first_name) updatedData.first_name = first_name;
