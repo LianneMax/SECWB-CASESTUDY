@@ -95,6 +95,12 @@
   border: 1px solid #2D2D2D; 
 }
 
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
 /* Right Side - Stack Content Vertically */
 
 

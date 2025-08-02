@@ -75,20 +75,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     row.insertCell(2).innerText = formatDate(reservation.date);
                     row.insertCell(3).innerText = formatTimeSlot(reservation.time);
 
+                    // Actions cell (Edit + Delete)
+                    const actionsCell = row.insertCell(4);
+
+                    // Button container for actions
+                    const buttonContainer = document.createElement("div");
+                    buttonContainer.className = "button-container";
+
                     // Edit button
-                    const editCell = row.insertCell(4);
                     const editButton = document.createElement("button");
                     editButton.className = "edit-button";
                     editButton.innerText = "Edit";
                     editButton.onclick = function () {
                         showEditOverlay(reservation);
                     };
-                    editCell.appendChild(editButton);
+                    buttonContainer.appendChild(editButton);
 
-                    // Delete button
-                    const deleteCell = row.insertCell(5);
+                    // Delete button 
                     const deleteButton = document.createElement("button");
-                    deleteButton.className = "delete-button";
+                    deleteButton.className = "edit-button"; // Use the same class for styling
                     deleteButton.innerText = "Delete";
                     deleteButton.onclick = async function () {
                         if (confirm("Are you sure you want to delete this reservation?")) {
@@ -108,7 +113,8 @@ document.addEventListener("DOMContentLoaded", function () {
                             }
                         }
                     };
-                    deleteCell.appendChild(deleteButton);
+                    buttonContainer.appendChild(deleteButton);
+                    actionsCell.appendChild(buttonContainer);
                 });
 
                 console.log("✅ Reservations successfully displayed.");
