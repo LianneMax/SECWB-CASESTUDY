@@ -78,14 +78,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 <td>${generateTimeSlot(reservation.time)}</td>
                 <td>${reservation.reservedBy || "⚠️ Unknown"}</td>
                 <td class="button-container">
-                    <button class="edit-btn" data-reservation-id="${reservation.id}">Edit</button>
+                    <button class="editButton" data-reservation-id="${reservation.id}">Edit</button>
                 </td>
             `;
             tableBody.appendChild(row);
         });
 
         // Attach event listeners to edit buttons (Staff only has edit, no delete)
-        document.querySelectorAll(".edit-btn").forEach(button => {
+        document.querySelectorAll(".editButton").forEach(button => {
             button.addEventListener("click", function () {
                 const reservationId = this.getAttribute("data-reservation-id");
                 console.log("Edit button clicked for reservation ID:", reservationId);
