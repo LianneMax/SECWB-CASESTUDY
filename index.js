@@ -43,7 +43,6 @@ app.use(express.static('uploads'))
 // MongoDB Connection
 const { connect } = require('./database/models/Conn.js');
 
-
 // SESSION
 app.use(session({
     secret: 'some secret',
@@ -63,10 +62,13 @@ app.use( bodyParser.urlencoded({extended: false}) )
 
 // Middleware to check if the user is authenticated
 const isAuthenticated = (req, res, next) => {
-    if(req.session.user)
+    if(req.session.user) {
         next()
-
-    else res.redirect("/login")
+    } else {
+        // Fail securely - redirect to login
+        console.log(`🔒 Authentication failed for ${req.originalUrl} - redirecting to /login`);
+        res.redirect("/login")
+    }
 }
 
 // Middleware to check if the user is a Lab Technician
@@ -74,7 +76,9 @@ const isLabTech = (req, res, next) => {
     if (req.session.user && req.session.user.account_type === "Lab Technician") {
         next()
     } else {
-        res.status(403).json({ message: "Access denied. Only Lab Technicians can perform this action." })
+        // Fail securely - serve 403 error page
+        console.log(`🚫 Lab Tech access denied for user: ${req.session.user?.email || 'Anonymous'} to ${req.originalUrl}`);
+        res.status(403).sendFile(path.join(__dirname, '403.html'))
     }
 }
 
@@ -83,9 +87,66 @@ const isStaff = (req, res, next) => {
     if (req.session.user && req.session.user.account_type === "Staff") {
         next()
     } else {
-        res.status(403).json({ message: "Access denied. Only Staff can perform this action." })
+        // Fail securely - serve 403 error page
+        console.log(`🚫 Staff access denied for user: ${req.session.user?.email || 'Anonymous'} to ${req.originalUrl}`);
+        res.status(403).sendFile(path.join(__dirname, '403.html'))
     }
 }
+
+// Middleware to check if user is Student (for routes that should only be accessible to students)
+const isStudent = (req, res, next) => {
+    if (req.session.user && req.session.user.account_type === "Student") {
+        next()
+    } else {
+        // Fail securely - serve 403 error page
+        console.log(`🚫 Student access denied for user: ${req.session.user?.email || 'Anonymous'} to ${req.originalUrl}`);
+        res.status(403).sendFile(path.join(__dirname, '403.html'))
+    }
+}
+
+// Middleware to check if user owns the resource or is authorized
+const isOwnerOrAuthorized = async (req, res, next) => {
+    try {
+        const user = req.session.user;
+        const reservationId = req.params.id;
+
+        if (!user) {
+            console.log(`🔒 No user session for resource access: ${req.originalUrl}`);
+            return res.redirect("/login");
+        }
+
+        // Lab Technicians and Staff have full access
+        if (user.account_type === "Lab Technician" || user.account_type === "Staff") {
+            return next();
+        }
+
+        // For students, check ownership
+        if (reservationId) {
+            const reservation = await Reservation.findById(reservationId);
+            if (!reservation) {
+                console.log(`🚫 Reservation not found: ${reservationId}`);
+                return res.status(404).sendFile(path.join(__dirname, '404.html'));
+            }
+
+            if (reservation.reserved_for_email === user.email) {
+                return next();
+            }
+        }
+
+        // Fail securely - access denied
+        console.log(`🚫 Resource access denied for user: ${user.email} to ${req.originalUrl}`);
+        res.status(403).sendFile(path.join(__dirname, '403.html'));
+
+    } catch (error) {
+        console.error("⚠️ Error in ownership check:", error);
+        res.status(500).sendFile(path.join(__dirname, '500.html'));
+    }
+}
+
+// Route to serve 403 error page directly
+app.get('/403', (req, res) => {
+    res.status(403).sendFile(path.join(__dirname, '403.html'));
+});
 
 // Get Reservations Seat Availability
 app.get("/all-reservations", isAuthenticated, async (req, res) => {
@@ -104,9 +165,15 @@ app.get("/all-reservations", isAuthenticated, async (req, res) => {
     }
 });
 
-// Get All Students
+// Get All Students - Restricted to Lab Tech and Staff only
 app.get("/all-students", isAuthenticated, async (req, res) => {
     try {
+        // Additional check - only Lab Tech and Staff can access student data
+        if (req.session.user.account_type !== "Lab Technician" && req.session.user.account_type !== "Staff") {
+            console.log(`🚫 Unauthorized attempt to access student data by: ${req.session.user.email}`);
+            return res.status(403).sendFile(path.join(__dirname, '403.html'));
+        }
+
         const students = await User.find({account_type: "Student"}).lean();
 
         if (!students || students.length === 0) {
@@ -174,30 +241,19 @@ app.get("/reservations", isLabTech, async (req, res) => {
     }
 });
 
-// LabTech & User Dashboard Deletion Feature Route
-app.delete('/reservations/:id', isAuthenticated, async (req, res) => {
+// LabTech & User Dashboard Deletion Feature Route - with proper authorization
+app.delete('/reservations/:id', isAuthenticated, isOwnerOrAuthorized, async (req, res) => {
     try {
         const reservationId = req.params.id;
-        const user = req.session.user;
 
-        // Find the reservation
-        const reservation = await Reservation.findById(reservationId);
+        // Find and delete the reservation
+        const deletedReservation = await Reservation.findByIdAndDelete(reservationId);
 
-        if (!reservation) {
+        if (!deletedReservation) {
             return res.status(404).json({ message: "Reservation not found" });
         }
 
-        // Allow if Lab Technician or reservation owner
-        const isLabTech = user.account_type === "Lab Technician";
-        const isOwner = reservation.reserved_for_email === user.email;
-
-        if (!isLabTech && !isOwner) {
-            return res.status(403).json({ message: "You are not authorized to delete this reservation." });
-        }
-
-        await Reservation.findByIdAndDelete(reservationId);
-
-        console.log(`✅ Reservation ${reservationId} deleted successfully`);
+        console.log(`✅ Reservation ${reservationId} deleted successfully by ${req.session.user.email}`);
         res.status(200).json({ message: "Reservation deleted successfully" });
     } catch (error) {
         console.error("⚠️ Error deleting reservation:", error);
@@ -205,7 +261,7 @@ app.delete('/reservations/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// Staff Dashboard Table Data (Add this route to your server.js)
+// Staff Dashboard Table Data
 app.get("/staff-reservations", isStaff, async (req, res) => {
     try {
         const reservations = await Reservation.find().lean();
@@ -258,7 +314,6 @@ app.get("/staff-reservations", isStaff, async (req, res) => {
     }
 });
 
-
 // Student Dashboard Table Data
 app.get("/my-reservations", isAuthenticated, async (req, res) => {
     try {
@@ -269,13 +324,15 @@ app.get("/my-reservations", isAuthenticated, async (req, res) => {
 
         const userEmail = req.query.email || req.session.user.email;
 
-        // const userEmail = req.session.user.email; // Get current user's email
+        // Security check - students can only access their own reservations
+        if (req.session.user.account_type === "Student" && userEmail !== req.session.user.email) {
+            console.log(`🚫 Student ${req.session.user.email} attempted to access reservations for ${userEmail}`);
+            return res.status(403).sendFile(path.join(__dirname, '403.html'));
+        }
+
         console.log(`🔍 Fetching reservations for user: ${userEmail}`);
 
-        // Query database for user's reservations
-        // let my_reservations = await Reservation.find({ email: userEmail }).lean();
         let reservations = await Reservation.find({reserved_for_email: userEmail }).lean();
-        // let reservations = my_reservations.concat(labtech_reservations); //combine
 
         if (!reservations || reservations.length === 0) {
             console.warn(`⚠️ No reservations found for ${userEmail}.`);
@@ -337,21 +394,18 @@ function sha256(password) {
 // Route to INDEX.HTML
 // localhost:3000/
 app.get('/', function(req,res){
-
     res.sendFile(__dirname + '/' + 'index.html')
 })
 
 // Route to About Us
 // localhost:3000/about-us
 app.get('/about-us', function(req,res){
-
     res.sendFile(__dirname + '/' + 'about-us.html')
 })
 
 // Route to register.html
 // localhost:3000/register
 app.get('/register', function(req,res){
-
     res.sendFile(__dirname + '/' + 'register.html')
 })
 
@@ -701,17 +755,24 @@ app.post("/login", express.urlencoded({ extended: true }), async (req, res) => {
     }
 });
 
-// Profile Page
+// Profile Page - with proper access control
 app.get('/profile', isAuthenticated, async (req, res) => {
     try {
-        const email = req.query.email || req.session.user.email; // Use query parameter or fallback to logged-in user
+        const email = req.query.email || req.session.user.email;
+        
+        // Security check - students can only view their own profile
+        if (req.session.user.account_type === "Student" && email !== req.session.user.email) {
+            console.log(`🚫 Student ${req.session.user.email} attempted to access profile for ${email}`);
+            return res.status(403).sendFile(path.join(__dirname, '403.html'));
+        }
+
         const userData = await User.findOne({ email }).lean();
 
         if (!userData) {
             return res.status(404).send("<script>alert('User not found!'); window.location='/dashboard';</script>");
         }
 
-        res.render('profile', { userData, sessionUser: req.session.user }); // Pass session user
+        res.render('profile', { userData, sessionUser: req.session.user });
     } catch (err) {
         console.error("⚠️ Error fetching profile:", err);
         res.status(500).send("<script>alert('Internal server error'); window.location='/dashboard';</script>");
@@ -861,6 +922,7 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
 app.post('/deleteaccount', isAuthenticated, async (req, res) => {
     try {
         const user_id = req.session.user._id;
+        const user_email = req.session.user.email;
         const { currentPassword } = req.body;
 
         const user = await User.findById(user_id);
@@ -873,7 +935,7 @@ app.post('/deleteaccount', isAuthenticated, async (req, res) => {
         // Delete all future reservations associated with the user
         const currentDate = new Date();
         const deletedReservations = await Reservation.deleteMany({
-            email: user_email,
+            reserved_for_email: user_email,
             reserved_date: { $gte: currentDate }
         });
 
@@ -912,7 +974,7 @@ app.post('/deleteaccount', isAuthenticated, async (req, res) => {
 });
 
 // Route to staff handlebar
-app.get('/staff', isAuthenticated, (req,res) => {
+app.get('/staff', isAuthenticated, isStaff, (req,res) => {
     const userData = req.session.user
     console.log(userData)
 
@@ -920,7 +982,7 @@ app.get('/staff', isAuthenticated, (req,res) => {
 })
 
 // Route to labtech handlebar
-app.get('/labtech', isAuthenticated, (req,res) => {
+app.get('/labtech', isAuthenticated, isLabTech, (req,res) => {
     const userData = req.session.user
     console.log(userData)
 
@@ -928,15 +990,10 @@ app.get('/labtech', isAuthenticated, (req,res) => {
 })
 
 // Route so Labtech admins can reserve for walk-in students
-app.post('/labtechReserve', isAuthenticated, async (req, res) => {
+app.post('/labtechReserve', isAuthenticated, isLabTech, async (req, res) => {
     try {
         const { reserved_date, building_id, room_num, seat_num, anonymous, reservedForEmail } = req.body;
         const user = req.session.user;
-
-        // Confirm user is a lab technician
-        if (user.account_type !== 'Lab Technician') {
-            return res.status(403).json({ message: "Only Lab Technicians can create this type of reservation." });
-        }
 
         // Check if the seat is already reserved
         const existingReservation = await Reservation.findOne({ room_num, seat_num, reserved_date });
@@ -969,13 +1026,10 @@ app.post('/labtechReserve', isAuthenticated, async (req, res) => {
     }
 });
 
-// Route to get the list of registered students in the database
-app.get('/labtechReserve', async (req, res) => {
+// Route to get the list of registered students in the database - LabTech only
+app.get('/labtechReserve', isAuthenticated, isLabTech, async (req, res) => {
     try {
         const userData = req.session.user;
-        if (!userData) {
-            return res.redirect('/login'); // Redirect to login if the user is not logged in
-        }
 
         // Fetch buildings from the database
         const buildings = await Building.find({}, 'building_name').lean();
@@ -991,8 +1045,8 @@ app.get('/labtechReserve', async (req, res) => {
     }
 });
 
-// Fetch available rooms for a selected building and floor
-app.get("/available-rooms", async (req, res) => {
+// Fetch available rooms for a selected building and floor - Authenticated users only
+app.get("/available-rooms", isAuthenticated, async (req, res) => {
     try {
         const { building, floor } = req.query;
 
@@ -1019,8 +1073,8 @@ app.get("/available-rooms", async (req, res) => {
     }
 });
 
-// Route to reservation handlebar (MUST DEPEND ON USER SESSION)
-app.get('/reserve', isAuthenticated, async (req, res) => {
+// Route to reservation handlebar (Students only)
+app.get('/reserve', isAuthenticated, isStudent, async (req, res) => {
     try {
         const userData = req.session.user;
         console.log(userData);
@@ -1045,14 +1099,16 @@ app.get('/dashboard', isAuthenticated, async(req,res) => {
         res.render('labtech', {userData})
     else if(userData.account_type == "Staff")
         res.render('staff', {userData})
-    else
-        res.redirect('/login')
+    else {
+        console.log(`🚫 Invalid account type for user: ${userData.email}`);
+        res.status(403).sendFile(path.join(__dirname, '403.html'));
+    }
 })
 
-// Create Reservation POST Route
-app.post('/reserve', isAuthenticated, async (req, res) => {
+// Create Reservation POST Route - Students only
+app.post('/reserve', isAuthenticated, isStudent, async (req, res) => {
     try {
-        const { reserved_date, building_id, room_num, seat_num, anonymous,  reserved_for_email } = req.body
+        const { reserved_date, building_id, room_num, seat_num, anonymous } = req.body
         const user = req.session.user // Get logged-in user
 
         // Check if seat is already reserved
@@ -1061,17 +1117,10 @@ app.post('/reserve', isAuthenticated, async (req, res) => {
             return res.status(400).json({ message: "Seat already reserved for this date" })
         }
 
-        let reserved_for = user.email;
-
-        // If lab tech reserves for a student
-        if(user.account_type != "Student"){
-            reserved_for = reserved_for_email;
-        }
-
         let anonStatus = "N"
         if(anonymous === "Y") anonStatus = "Y" 
 
-        // Create reservation
+        // Create reservation - students can only reserve for themselves
         const newReservation = new Reservation({
             email: user.email, //who reserved the seat
             request_date: new Date(),
@@ -1080,13 +1129,13 @@ app.post('/reserve', isAuthenticated, async (req, res) => {
             room_num: room_num,
             seat_num: seat_num,
             anonymous: anonStatus,
-            reserved_for_email: reserved_for,
+            reserved_for_email: user.email, // Students can only reserve for themselves
         })
 
         await newReservation.save()
         console.log(`✅ Reservation created by ${req.session.user.first_name}`)
 
-        // res.status(201).json({ message: "Reservation created successfully!" })
+        res.status(201).json({ message: "Reservation created successfully!" })
     } catch (err) {
         console.error("⚠️ Error creating reservation:", err)
         res.status(500).json({ message: "Internal server error" })
@@ -1116,8 +1165,8 @@ app.post('/check-reservation-conflict', isAuthenticated, async (req, res) => {
     }
 });
 
-// Update reservation
-app.put('/update-reservation/:id', isAuthenticated, async (req, res) => {
+// Update reservation - with proper authorization
+app.put('/update-reservation/:id', isAuthenticated, isOwnerOrAuthorized, async (req, res) => {
     try {
         const { id } = req.params;
         const { reserved_date, time, room, seat } = req.body;
@@ -1154,7 +1203,6 @@ app.put('/update-reservation/:id', isAuthenticated, async (req, res) => {
             return res.status(404).json({ error: 'Reservation not found' });
         }
 
-
     } catch (error) {
         console.error('Error updating reservation:', error);
         res.status(500).json({ error: 'Server error' });
@@ -1189,7 +1237,6 @@ app.get('/logout', (req, res) => {
         res.redirect('/')
     })
 })
-
 
 const PORT = 3000;
 
