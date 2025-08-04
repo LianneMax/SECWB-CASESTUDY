@@ -136,6 +136,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 1000); // Update every second
     }
 
+    // Reset failed attempts and show incorrect password modal once timeout ends
+    function resetFailedAttempts() {
+        failedAttempts = 0; // Reset failed attempts
+        incorrectPasswordModal.open(); // Show incorrect password modal
+        console.log("Failed attempts reset to 0.");
+    }
+
     // Handle forgot password flow
     forgotPasswordLink?.addEventListener('click', async (e) => {
         e.preventDefault();
