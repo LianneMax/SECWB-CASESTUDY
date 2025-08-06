@@ -84,11 +84,30 @@ const isLabTech = (req, res, next) => {
 
 // Middleware to check if the user is Staff
 const isStaff = (req, res, next) => {
+    console.log(`🔍 Staff middleware check - User: ${req.session.user?.email}, Account Type: ${req.session.user?.account_type}, URL: ${req.originalUrl}`);
+    
     if (req.session.user && req.session.user.account_type === "Staff") {
+        console.log(`✅ Staff access granted for ${req.session.user.email}`);
         next()
     } else {
         // Fail securely - serve 403 error page
         console.log(`🚫 Staff access denied for user: ${req.session.user?.email || 'Anonymous'} to ${req.originalUrl}`);
+        console.log(`🔍 Session data:`, req.session.user);
+        res.status(403).sendFile(path.join(__dirname, '403.html'))
+    }
+}
+
+// Middleware to check if the user is Lab Technician OR Staff
+const isLabTechOrStaff = (req, res, next) => {
+    console.log(`🔍 LabTech/Staff middleware check - User: ${req.session.user?.email}, Account Type: ${req.session.user?.account_type}, URL: ${req.originalUrl}`);
+    
+    if (req.session.user && (req.session.user.account_type === "Lab Technician" || req.session.user.account_type === "Staff")) {
+        console.log(`✅ LabTech/Staff access granted for ${req.session.user.email}`);
+        next()
+    } else {
+        // Fail securely - serve 403 error page
+        console.log(`🚫 Lab Tech/Staff access denied for user: ${req.session.user?.email || 'Anonymous'} to ${req.originalUrl}`);
+        console.log(`🔍 Session data:`, req.session.user);
         res.status(403).sendFile(path.join(__dirname, '403.html'))
     }
 }
@@ -989,62 +1008,6 @@ app.get('/labtech', isAuthenticated, isLabTech, (req,res) => {
     res.render('labtech', {userData})
 })
 
-// Route so Labtech admins can reserve for walk-in students
-app.post('/labtechReserve', isAuthenticated, isLabTech, async (req, res) => {
-    try {
-        const { reserved_date, building_id, room_num, seat_num, anonymous, reservedForEmail } = req.body;
-        const user = req.session.user;
-
-        // Check if the seat is already reserved
-        const existingReservation = await Reservation.findOne({ room_num, seat_num, reserved_date });
-        if (existingReservation) {
-            return res.status(400).json({ message: "Seat already reserved for this date" });
-        }
-
-        // Determine who the reservation is for
-        const reservedFor = anonymous === "Y" ? null : reservedForEmail;
-
-        // Create the reservation
-        const newReservation = new Reservation({
-            email: user.email, // the labtech who made the reservation
-            request_date: new Date(),
-            reserved_date,
-            building_id,
-            room_num,
-            seat_num,
-            anonymous,
-            reserved_for_email: reservedFor
-        });
-
-        await newReservation.save();
-        console.log(`✅ LabTech ${user.email} reserved a seat for ${reservedFor || "Anonymous"}`);
-
-        res.redirect('/labtech');
-    } catch (err) {
-        console.error("⚠️ Error creating LabTech reservation:", err);
-        res.status(500).json({ message: "Internal server error" });
-    }
-});
-
-// Route to get the list of registered students in the database - LabTech only
-app.get('/labtechReserve', isAuthenticated, isLabTech, async (req, res) => {
-    try {
-        const userData = req.session.user;
-
-        // Fetch buildings from the database
-        const buildings = await Building.find({}, 'building_name').lean();
-
-        // Fetch students using getStudentsFromDB function
-        const students = await getStudentsFromDB();
-
-        // Render the labtechReserve page and pass userData, buildings, and students
-        res.render('labtechReserve', { userData, buildings, students });
-    } catch (error) {
-        console.error("Error fetching buildings and students:", error);
-        res.status(500).send("Error fetching buildings and students");
-    }
-});
-
 // Fetch available rooms for a selected building and floor - Authenticated users only
 app.get("/available-rooms", isAuthenticated, async (req, res) => {
     try {
@@ -1073,15 +1036,29 @@ app.get("/available-rooms", isAuthenticated, async (req, res) => {
     }
 });
 
-// Route to reservation handlebar (Students only)
-app.get('/reserve', isAuthenticated, isStudent, async (req, res) => {
+// Route to reservation handlebar (All authenticated users)
+app.get('/reserve', isAuthenticated, async (req, res) => {
     try {
         const userData = req.session.user;
         console.log(userData);
 
         const buildings = await Building.find({}, 'building_name'); // Fetch buildings
 
-        res.render('reserve', { userData, buildings }); // Pass buildings to Handlebars
+        // For Staff and LabTech, also fetch students
+        let students = [];
+        if (userData.account_type === "Staff" || userData.account_type === "Lab Technician") {
+            students = await getStudentsFromDB();
+        }
+
+        // Pass different flags based on user type
+        const templateData = {
+            userData,
+            buildings,
+            isAdmin: userData.account_type === "Staff" || userData.account_type === "Lab Technician",
+            students: students
+        };
+
+        res.render('reserve', templateData);
     } catch (error) {
         console.error("Error fetching buildings:", error);
         res.status(500).send("Error fetching buildings");
@@ -1105,10 +1082,10 @@ app.get('/dashboard', isAuthenticated, async(req,res) => {
     }
 })
 
-// Create Reservation POST Route - Students only
-app.post('/reserve', isAuthenticated, isStudent, async (req, res) => {
+// Create Reservation POST Route - All authenticated users
+app.post('/reserve', isAuthenticated, async (req, res) => {
     try {
-        const { reserved_date, building_id, room_num, seat_num, anonymous } = req.body
+        const { reserved_date, building_id, room_num, seat_num, anonymous, reservedForEmail } = req.body
         const user = req.session.user // Get logged-in user
 
         // Check if seat is already reserved
@@ -1120,20 +1097,31 @@ app.post('/reserve', isAuthenticated, isStudent, async (req, res) => {
         let anonStatus = "N"
         if(anonymous === "Y") anonStatus = "Y" 
 
-        // Create reservation - students can only reserve for themselves
+        let finalReservedForEmail;
+        
+        // Determine who the reservation is for based on user type
+        if (user.account_type === "Student") {
+            // Students can only reserve for themselves
+            finalReservedForEmail = user.email;
+        } else if (user.account_type === "Lab Technician" || user.account_type === "Staff") {
+            // Staff and LabTech can reserve for others
+            finalReservedForEmail = anonStatus === "Y" ? null : (reservedForEmail || user.email);
+        }
+
+        // Create reservation
         const newReservation = new Reservation({
-            email: user.email, //who reserved the seat
+            email: user.email, // who made the reservation
             request_date: new Date(),
             reserved_date: reserved_date,
             building_id: building_id,
             room_num: room_num,
             seat_num: seat_num,
             anonymous: anonStatus,
-            reserved_for_email: user.email, // Students can only reserve for themselves
+            reserved_for_email: finalReservedForEmail
         })
 
         await newReservation.save()
-        console.log(`✅ Reservation created by ${req.session.user.first_name}`)
+        console.log(`✅ Reservation created by ${user.first_name} (${user.account_type}) for ${finalReservedForEmail || "Anonymous"}`)
 
         res.status(201).json({ message: "Reservation created successfully!" })
     } catch (err) {
@@ -1165,46 +1153,92 @@ app.post('/check-reservation-conflict', isAuthenticated, async (req, res) => {
     }
 });
 
-// Update reservation - with proper authorization
+// Update reservation - with proper authorization and enhanced functionality
 app.put('/update-reservation/:id', isAuthenticated, isOwnerOrAuthorized, async (req, res) => {
     try {
         const { id } = req.params;
-        const { reserved_date, time, room, seat } = req.body;
-        console.log("Edit reservation: " + reserved_date, time, room, seat);
+        const { reserved_date, time, room, seat, anonymous, reservedForEmail } = req.body;
+        const user = req.session.user;
+        
+        console.log(`🔄 Update request from ${user.email} (${user.account_type}) for reservation ${id}`);
+        console.log('📋 Update data:', { reserved_date, time, room, seat, anonymous, reservedForEmail });
 
-        // Create a date object from the date and time
-        const reservationDateTime = new Date(`${reserved_date}T${time}`);
-
-        let reservationExists = await Reservation.findOne({reserved_date: reservationDateTime, room_num: room, seat_num: seat});
-        console.log("reservationExists: " + reservationExists);
-
-        let updatedReservation = {}
-
-        // UPDATE if seat is available at the new time
-        if(reservationExists == null){
-            console.log("Reservation is free.")
-            updatedReservation = await Reservation.findByIdAndUpdate(
-                id,
-                {
-                    reserved_date: reservationDateTime,
-                    request_date: new Date(), // Update request date to current time
-                },
-                { new: true }
-            );
-
-            res.json(updatedReservation);
-            console.log("updatedReservation: " +updatedReservation);
-        }
-        else {
-            return res.status(404).json({ error: 'Seat already reserved at that date and time' });
-        }
-
-        if (!updatedReservation) {
+        // Find the existing reservation
+        const existingReservation = await Reservation.findById(id);
+        if (!existingReservation) {
+            console.log(`❌ Reservation ${id} not found`);
             return res.status(404).json({ error: 'Reservation not found' });
         }
 
+        // Create the new reservation datetime
+        const reservationDateTime = new Date(`${reserved_date}T${time}`);
+
+        // Check for conflicts (exclude current reservation)
+        const conflictingReservation = await Reservation.findOne({
+            _id: { $ne: id }, // Exclude current reservation
+            reserved_date: reservationDateTime,
+            room_num: room,
+            seat_num: parseInt(seat)
+        });
+
+        if (conflictingReservation) {
+            console.log(`❌ Conflict found for ${room} seat ${seat} at ${reservationDateTime}`);
+            return res.status(409).json({ error: 'Seat already reserved at that date and time' });
+        }
+
+        // Prepare update data
+        const updateData = {
+            reserved_date: reservationDateTime,
+            request_date: new Date() // Update request date to current time
+        };
+
+        // Handle reservation assignment based on user role
+        if (user.account_type === "Staff" || user.account_type === "Lab Technician") {
+            // Staff and Lab Techs can change who the reservation is for
+            if (anonymous === "Y") {
+                updateData.anonymous = "Y";
+                updateData.reserved_for_email = null;
+                console.log(`🕶️ Setting reservation ${id} as anonymous`);
+            } else {
+                updateData.anonymous = "N";
+                updateData.reserved_for_email = reservedForEmail || existingReservation.reserved_for_email;
+                console.log(`👤 Assigning reservation ${id} to: ${updateData.reserved_for_email}`);
+            }
+        } else if (user.account_type === "Student") {
+            // Students can only update date/time, not assignment
+            console.log(`👨‍🎓 Student update - keeping existing assignment: ${existingReservation.reserved_for_email}`);
+        }
+
+        // Update the reservation
+        const updatedReservation = await Reservation.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true }
+        );
+
+        if (!updatedReservation) {
+            console.log(`❌ Failed to update reservation ${id}`);
+            return res.status(500).json({ error: 'Failed to update reservation' });
+        }
+
+        console.log(`✅ Reservation ${id} updated successfully by ${user.email}`);
+        
+        // Return the updated reservation data
+        res.json({
+            success: true,
+            message: 'Reservation updated successfully',
+            reservation: {
+                id: updatedReservation._id,
+                room_num: updatedReservation.room_num,
+                seat_num: updatedReservation.seat_num,
+                reserved_date: updatedReservation.reserved_date,
+                reserved_for_email: updatedReservation.reserved_for_email,
+                anonymous: updatedReservation.anonymous
+            }
+        });
+
     } catch (error) {
-        console.error('Error updating reservation:', error);
+        console.error('⚠️ Error updating reservation:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
