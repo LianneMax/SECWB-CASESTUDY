@@ -53,7 +53,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const registrationForm = document.getElementById("registrationForm");
 
     // Handle form submission
-    // Update the form submission handler in registerJS.js
     if (createAccountButton) {
         createAccountButton.addEventListener("click", async function (event) {
             event.preventDefault();
@@ -64,6 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 last_name: formData.get("last_name")?.trim(),
                 email: formData.get("email")?.trim(),
                 password: formData.get("password")?.trim(),
+                confirm_password: formData.get("confirm_password")?.trim(),
                 account_type: "Student",
                 security_question: formData.get("security_question")?.trim(),
                 security_answer: formData.get("security_answer")?.trim()
@@ -75,17 +75,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
+            // Check if passwords match
+            if (data.password !== data.confirm_password) {
+                alert("⚠️ Passwords do not match. Please ensure both password fields are identical.");
+                return;
+            }
+
             // Check if email contains @dlsu.edu.ph
             if (!data.email.endsWith("@dlsu.edu.ph")) {
                 alert("⚠️ Email must be a valid DLSU email ending with @dlsu.edu.ph.");
                 return;
             }
 
+            // Remove confirm_password from data before sending to server
+            const { confirm_password, ...serverData } = data;
+
             try {
                 const response = await fetch("/register", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(serverData)
                 });
 
                 const result = await response.json();
@@ -110,7 +119,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
     
-
     // "Get Started" closes the modal and redirects to /login
     if (getStartedButton) {
         getStartedButton.addEventListener("click", function () {
