@@ -433,147 +433,125 @@ function initializeSeats(){
         }
 
             seat.addEventListener("click", () => {
-                if (seat.classList.contains("available") || seat.classList.contains("reserved")) {
-                    // If another seat is already selected, reset it back to original color
-                    if (selectedSeat) {
-                        if (selectedSeat.classList.contains("available")) {
-                            selectedSeat.src = "images/GreenSeat.svg";
-                        } else if (selectedSeat.classList.contains("reserved")) {
-                            selectedSeat.src = "images/RedSeat.svg";
-                        }
-                        selectedSeat.classList.remove("selected");
+            if (seat.classList.contains("available") || seat.classList.contains("reserved")) {
+                // If another seat is already selected, reset it back to original color
+                if (selectedSeat) {
+                    if (selectedSeat.classList.contains("available")) {
+                        selectedSeat.src = "images/GreenSeat.svg";
+                    } else if (selectedSeat.classList.contains("reserved")) {
+                        selectedSeat.src = "images/RedSeat.svg";
                     }
-
-                    // Set new selected seat
-                    selectedSeat = seat;
-                    seat.src = "images/BlueSeat.svg";
-                    seat.classList.add("selected");
-
-                    // Update seat info overlay
-                    if (seat.classList.contains("available") && User.account_type === "Student") {
-                    
-                    // Seat Overlay with FORM
-
-                        seatInfoOverlay.innerHTML = `
-                        <form method="post">
-                            <p class="available-text">This Seat Is Available</p>
-                            <div class="anonymous-container">
-                                <input 
-                                    type="checkbox" 
-                                    id="anonymousCheckbox" 
-                                    class="anonymous-checkbox" 
-                                    name="anonymous"
-                                    value="Y">
-                                <label for="anonymousCheckbox" class="anonymous-label">Anonymous</label>
-                            </div>
-
-                            <div><input type="hidden" id="anonStatus" name="anonymous"></div>
-                            <div><input type="hidden" id="reserved_date" name="reserved_date"></div>
-                            <div><input type="hidden" id="building_id" name="building_id"></div>
-                            <div><input type="hidden" id="room_num" name="room_num"></div>
-                            <div><input type="hidden" id="seat_num" name="seat_num"></div>
-                            
-                            <button type="submit" class="confirm-btn">Confirm</button>
-                        </form>
-                        `;
-
-                        updateInputs();
-                        
-                    } 
-
-                    else if (seat.classList.contains("available") && User.account_type === "Lab Technician") {
-                    
-
-                        seatInfoOverlay.innerHTML = `
-                        <form method="post">
-
-                            <p class="available-text">This Seat Is Available</p>
-
-                            <div class="anonymous-container">
-                                <input 
-                                    type="checkbox" 
-                                    id="anonymousCheckbox" 
-                                    class="anonymous-checkbox" 
-                                    name="anonymous-checkbox"
-                                    value="Y">
-                                <label for="anonymousCheckbox" class="anonymous-label">Anonymous</label>
-                            </div>
-
-                            
-
-                            <div class="dropdown-container">
-                                <div class="selectstudent-dropdown">
-                                    <select id="student-selection" class="dropdown-select small-text" name="reserved_for_email">
-                                        <option value="" selected>Reserve For Who:</option>
-                                    </select>
-                                </div>
-                                        <button type="submit" class="confirm-btn">Confirm</button>
-
-                            </div>
-
-                            <div><input type="hidden" id="anonStatus" name="anonymous"></div>
-                            <div><input type="hidden" id="reserved_date" name="reserved_date"></div>
-                            <div><input type="hidden" id="building_id" name="building_id"></div>
-                            <div><input type="hidden" id="room_num" name="room_num"></div>
-                            <div><input type="hidden" id="seat_num" name="seat_num"></div>
-                            
-                            
-                        </div>    
-                        </form>
-                        `;
-
-                        updateInputs()
-
-                        // ✅ Set reservedForEmail from dropdown
-                        function fillStudentDropdown() {
-                            const dropdown = document.getElementById("student-selection");
-                            students.forEach((student) => {
-                                const option = document.createElement("option");
-                                option.value = student.email;
-                                option.textContent = student.email;
-                                option.setAttribute("data-email", student.email);
-                                dropdown.appendChild(option);
-                            })
-                        }
-                    
-                        fillStudentDropdown();
-                        
-
-                        
-                    } 
-                    // Overlay when seat is taken
-                    else if (seat.classList.contains("reserved") && myReservation.anonymous === "N") {
-                        seatInfoOverlay.innerHTML = `
-                            <p class="occupied-text">This seat is Occupied by:</p>
-                            <p class="occupied-email">
-                                <a href="/profile?email=${myReservation.reserved_for_email}">${myReservation.reserved_for_email}</a>
-                            </p>
-                        `;
-
-                        
-                    }
-                    else {
-                        seatInfoOverlay.innerHTML = `
-                            <p class="occupied-text">This seat is Occupied by:</p>
-                            
-                             
-                            <p class="occupied-email">Anonymous</p>
-                            
-                        `;
-                    }
-
-                    // CONFIRM BUTTON LISTENER
-                    document.querySelector(".confirm-btn")?.addEventListener("click", () => {
-
-                        const seatNo = document.getElementById("seat_num").value
-
-                        showConfirmationOverlay(roomName, datePicker.value, timePicker.value, seatNo);
-                        const buildingDropdown = document.getElementById("building-location");
-                        buildingDropdown.value = "Select a Building" //reset selected building
-
-                    });
+                    selectedSeat.classList.remove("selected");
                 }
-            });
+
+                // Set new selected seat
+                selectedSeat = seat;
+                seat.src = "images/BlueSeat.svg";
+                seat.classList.add("selected");
+
+                // Update seat info overlay
+                if (seat.classList.contains("available") && User.account_type === "Student") {
+                    // Student reservation form (existing code)
+                    seatInfoOverlay.innerHTML = `
+                    <form method="post">
+                        <p class="available-text">This Seat Is Available</p>
+                        <div class="anonymous-container">
+                            <input 
+                                type="checkbox" 
+                                id="anonymousCheckbox" 
+                                class="anonymous-checkbox" 
+                                name="anonymous"
+                                value="Y">
+                            <label for="anonymousCheckbox" class="anonymous-label">Anonymous</label>
+                        </div>
+
+                        <div><input type="hidden" id="anonStatus" name="anonymous"></div>
+                        <div><input type="hidden" id="reserved_date" name="reserved_date"></div>
+                        <div><input type="hidden" id="building_id" name="building_id"></div>
+                        <div><input type="hidden" id="room_num" name="room_num"></div>
+                        <div><input type="hidden" id="seat_num" name="seat_num"></div>
+                        
+                        <button type="submit" class="confirm-btn">Confirm</button>
+                    </form>
+                    `;
+
+                    updateInputs();
+                } 
+                // Condition that includes both Lab Technician and Staff
+                else if (seat.classList.contains("available") && (User.account_type === "Lab Technician" || User.account_type === "Staff")) {
+                    
+                    seatInfoOverlay.innerHTML = `
+                    <form method="post">
+                        <p class="available-text">This Seat Is Available</p>
+
+                        <div class="anonymous-container">
+                            <input 
+                                type="checkbox" 
+                                id="anonymousCheckbox" 
+                                class="anonymous-checkbox" 
+                                name="anonymous-checkbox"
+                                value="Y">
+                            <label for="anonymousCheckbox" class="anonymous-label">Anonymous</label>
+                        </div>
+
+                        <div class="dropdown-container">
+                            <div class="selectstudent-dropdown">
+                                <select id="student-selection" class="dropdown-select small-text" name="reserved_for_email">
+                                    <option value="" selected>Reserve For Who:</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="confirm-btn">Confirm</button>
+                        </div>
+
+                        <div><input type="hidden" id="anonStatus" name="anonymous"></div>
+                        <div><input type="hidden" id="reserved_date" name="reserved_date"></div>
+                        <div><input type="hidden" id="building_id" name="building_id"></div>
+                        <div><input type="hidden" id="room_num" name="room_num"></div>
+                        <div><input type="hidden" id="seat_num" name="seat_num"></div>
+                    </form>
+                    `;
+
+                    updateInputs()
+
+                    // Fill student dropdown for both Lab Tech and Staff
+                    function fillStudentDropdown() {
+                        const dropdown = document.getElementById("student-selection");
+                        students.forEach((student) => {
+                            const option = document.createElement("option");
+                            option.value = student.email;
+                            option.textContent = student.email;
+                            option.setAttribute("data-email", student.email);
+                            dropdown.appendChild(option);
+                        })
+                    }
+                
+                    fillStudentDropdown();
+                } 
+                // Overlay when seat is taken
+                else if (seat.classList.contains("reserved") && myReservation.anonymous === "N") {
+                    seatInfoOverlay.innerHTML = `
+                        <p class="occupied-text">This seat is Occupied by:</p>
+                        <p class="occupied-email">
+                            <a href="/profile?email=${myReservation.reserved_for_email}">${myReservation.reserved_for_email}</a>
+                        </p>
+                    `;
+                }
+                else {
+                    seatInfoOverlay.innerHTML = `
+                        <p class="occupied-text">This seat is Occupied by:</p>
+                        <p class="occupied-email">Anonymous</p>
+                    `;
+                }
+
+                // CONFIRM BUTTON LISTENER
+                document.querySelector(".confirm-btn")?.addEventListener("click", () => {
+                    const seatNo = document.getElementById("seat_num").value
+                    showConfirmationOverlay(roomName, datePicker.value, timePicker.value, seatNo);
+                    const buildingDropdown = document.getElementById("building-location");
+                    buildingDropdown.value = "Select a Building" //reset selected building
+                });
+            }
+        });
 
             seatRow.appendChild(seat);
         });
