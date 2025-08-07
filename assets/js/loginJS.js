@@ -48,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const forgotPasswordModal = new ModalHandler("forgot-password-modal", "close-forgot");
     const changePasswordModal = new ModalHandler("change-password-modal", "close-change-password");
     const incorrectPasswordModal = new ModalHandler("incorrect-password-modal", "close-incorrect");
+    const accountLockedModal = new ModalHandler("account-locked-modal", "close-locked");
     const timeoutModal = new ModalHandler("timeout-modal", "close-timeout");
 
     // Get form elements
@@ -63,8 +64,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Failed login attempts counter
     let failedAttempts = 0;
     const maxAttempts = 5; // Max failed attempts before timeout
-    const timeoutDuration = 600000; // Timeout duration set to 10 minutes (600,000 milliseconds)
-    let timeoutTimer = null;
+    const timeoutDuration = 15 * 60 * 1000; // 15 minutes (matching your server)
+    let lockoutTimer = null;
     let remainingTime = timeoutDuration / 1000; // remaining time in seconds
 
     // Handle login form submission
@@ -96,17 +97,34 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 console.warn("⚠️ Login failed:", data.message);
 
-                // Log the message and check if account is locked
+                // Check if account is locked
                 if (data.message && data.message.includes("Account locked")) {
-                    console.log("🔒 Account locked. Showing timeout modal.");
-                    failedAttempts = maxAttempts; // Ensure failed attempts reach max to show timeout modal
-                    timeoutModal.open(); // Show timeout modal
-                    startTimeoutCountdown(); // Start the countdown
-                    clearTimeout(timeoutTimer); // Clear any previous timeout
+                    console.log("🔒 Account locked. Showing account locked modal.");
+                    failedAttempts = maxAttempts; // Set to max attempts
+                    
+                    // Extract the unlock time from the server response if available
+                    if (data.lockUntil) {
+                        const unlockTime = new Date(data.lockUntil);
+                        const currentTime = new Date();
+                        remainingTime = Math.max(0, Math.floor((unlockTime - currentTime) / 1000));
+                    } else {
+                        remainingTime = timeoutDuration / 1000; // Default to full duration
+                    }
+                    
+                    accountLockedModal.open(); // Show account locked modal
+                    startLockoutCountdown(); // Start the countdown
                 } else {
                     failedAttempts++; // Increment failed attempts for invalid passwords
-                    incorrectPasswordModal.open(); // Show incorrect password modal
-                    console.log("❌ Incorrect password. Showing incorrect-password modal.");
+                    
+                    if (failedAttempts >= maxAttempts) {
+                        console.log("🔒 Maximum attempts reached. Locking account.");
+                        remainingTime = timeoutDuration / 1000;
+                        accountLockedModal.open(); // Show account locked modal
+                        startLockoutCountdown(); // Start the countdown
+                    } else {
+                        incorrectPasswordModal.open(); // Show incorrect password modal
+                        console.log("❌ Incorrect password. Showing incorrect-password modal.");
+                    }
                 }
             }
         } catch (error) {
@@ -115,12 +133,52 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Close timeout modal when "Try Again" is clicked
+    // Countdown timer for account locked modal
+    function startLockoutCountdown() {
+        // Clear any existing timer
+        if (lockoutTimer) {
+            clearInterval(lockoutTimer);
+        }
+        
+        const updateCountdown = () => {
+            if (remainingTime <= 0) {
+                // Timer finished - reset everything
+                failedAttempts = 0; // Reset failed attempts to 0
+                accountLockedModal.close(); // Close the modal
+                console.log("✅ Lockout period ended. Failed attempts reset to 0.");
+                clearInterval(lockoutTimer);
+                lockoutTimer = null;
+                return;
+            }
+
+            // Calculate minutes and seconds
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
+            
+            // Update the message
+            const lockedMessage = document.getElementById("locked-message");
+            if (lockedMessage) {
+                if (minutes > 0) {
+                    lockedMessage.textContent = `Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+                } else {
+                    lockedMessage.textContent = `Please try again in ${seconds} second${seconds !== 1 ? 's' : ''}`;
+                }
+            }
+            
+            remainingTime--;
+        };
+
+        // Update immediately, then every second
+        updateCountdown();
+        lockoutTimer = setInterval(updateCountdown, 1000);
+    }
+
+    // Close timeout modal when "Try Again" is clicked (keeping original functionality)
     document.getElementById("try-again")?.addEventListener("click", () => {
         timeoutModal.close();
     });
 
-    // Countdown timer for timeout modal
+    // Countdown timer for timeout modal (keeping original functionality)
     function startTimeoutCountdown() {
         let countdownTimer = setInterval(() => {
             if (remainingTime <= 0) {
@@ -136,19 +194,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 1000); // Update every second
     }
 
-    // Reset failed attempts and show incorrect password modal once timeout ends
-    function resetFailedAttempts() {
-        failedAttempts = 0; // Reset failed attempts
-        incorrectPasswordModal.open(); // Show incorrect password modal
-        console.log("Failed attempts reset to 0.");
-    }
-
     // Handle forgot password flow
     forgotPasswordLink?.addEventListener('click', async (e) => {
         e.preventDefault();
         forgotPasswordModal.open();
 
-        // ✅ Reset overlay text for the email step
+        // Reset overlay text for the email step
         document.querySelector('.overlay-text').textContent = "Please enter your email address to reset your password";
 
         document.querySelector('.forgot-form-container').innerHTML = `
@@ -167,6 +218,24 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('forgot-password-link-modal')?.addEventListener('click', (e) => {
         e.preventDefault();
         incorrectPasswordModal.close();
+        forgotPasswordModal.open();
+
+        document.querySelector('.forgot-form-container').innerHTML = `
+            <div class="input-group">
+                <label class="static-label" for="recovery-email">DLSU Email</label>
+                <input type="email" id="recovery-email" class="static-input" placeholder="example_name@dlsu.edu.ph">
+            </div>
+            <button id="verify-email" class="submit-btn">Next</button>
+            <a href="#" id="back-to-login" class="back-link">Back to Login</a>
+        `;
+
+        document.getElementById('verify-email')?.addEventListener('click', verifyEmail);
+    });
+
+    // Handle forgot password link in account locked modal
+    document.getElementById('forgot-password-link-locked')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        accountLockedModal.close();
         forgotPasswordModal.open();
 
         document.querySelector('.forgot-form-container').innerHTML = `
