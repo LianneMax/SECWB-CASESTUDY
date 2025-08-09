@@ -844,34 +844,55 @@ app.post('/submit-profile-details', isAuthenticated, async (req, res) => {
         const userData = req.session.user;
         const { first_name, last_name, description } = req.body;
 
+        // Validation checks
         if (first_name && first_name.length > 25) {
-            return res.status(400).send("<script>alert('First name must be at most 25 characters.'); window.location='/profile';</script>");
+            return res.status(400).json({ 
+                success: false, 
+                message: 'First name must be at most 25 characters.' 
+            });
         }
         if (last_name && last_name.length > 25) {
-            return res.status(400).send("<script>alert('Last name must be at most 25 characters.'); window.location='/profile';</script>");
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Last name must be at most 25 characters.' 
+            });
         }
         if (description && description.length > 50) {
-            return res.status(400).send("<script>alert('Description must be at most 50 characters.'); window.location='/profile';</script>");
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Description must be at most 50 characters.' 
+            });
         }
 
+        // Build update object with only non-empty fields
         const updatedData = {};
-        if (first_name) updatedData.first_name = first_name;
-        if (last_name) updatedData.last_name = last_name;
-        if (description) updatedData.description = description;
+        if (first_name && first_name.trim()) updatedData.first_name = first_name.trim();
+        if (last_name && last_name.trim()) updatedData.last_name = last_name.trim();
+        if (description && description.trim()) updatedData.description = description.trim();
 
         if (Object.keys(updatedData).length > 0) {
             const updatedUser = await User.findByIdAndUpdate(userData._id, updatedData, { new: true });
             req.session.user = updatedUser; // Update session with new user data
             console.log("✅ Profile updated:", updatedData);
 
-            res.redirect('/profile')
+            // Return JSON response instead of redirect
+            return res.status(200).json({ 
+                success: true, 
+                message: "Profile updated successfully!" 
+            });
 
         } else {
-            return res.status(400).json({ success: false, message: "No changes made." });
+            return res.status(400).json({ 
+                success: false, 
+                message: "No changes made." 
+            });
         }
     } catch (err) {
         console.error("⚠️ Error updating profile:", err);
-        res.status(500).json({ success: false, message: "Internal server error." });
+        res.status(500).json({ 
+            success: false, 
+            message: "Internal server error." 
+        });
     }
 });
 

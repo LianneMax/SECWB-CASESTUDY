@@ -854,4 +854,201 @@ body {
     display: none;
 }
 
+/* Enhanced No Changes Modal Styles */
+#noChangesModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+#noChangesModal .modal-content.no-changes {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 
+                0 8px 25px rgba(0, 0, 0, 0.1);
+    padding: 40px 35px 35px;
+    text-align: center;
+    position: relative;
+    max-width: 450px;
+    width: 90%;
+    margin: 0 auto;
+    border: 1px solid rgba(55, 118, 132, 0.1);
+    animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: center;
+}
+
+/* Modal animation keyframes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.7) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Close button styling */
+#noChangesModal .close-no-changes {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #94a3b8;
+    font-size: 28px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: transparent;
+}
+
+#noChangesModal .close-no-changes:hover {
+    color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
+    transform: scale(1.1);
+}
+
+/* Info icon styling */
+#noChangesModal .info-icon {
+    margin: 0 auto 20px;
+    width: 50px;
+    height: 50px;
+    background: #f0f0f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#noChangesModal .info-icon .icon {
+    font-size: 24px;
+    color: black;
+}
+
+/* Typography */
+#noChangesModal .no-changes h2 {
+    color: #1e293b;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    letter-spacing: -0.5px;
+    line-height: 1.3;
+}
+
+#noChangesModal .no-changes p {
+    color: #64748b;
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0 0 30px 0;
+    font-weight: 400;
+}
+
+/* Button styling */
+#noChangesModal .button-group {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+#noChangesModal .ok-btn {
+    font-family: Newsreader;
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: 1px solid #D1D5DB;
+    background: white;
+    color: #2D2D2D;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+#noChangesModal .ok-btn:hover {
+    background-color: #2D2D2D;
+    color: white;
+    border: 1px solid #2D2D2D;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    #noChangesModal .modal-content.no-changes {
+        margin: 20px;
+        padding: 30px 25px 25px;
+        max-width: none;
+        width: calc(100% - 40px);
+    }
+    
+    #noChangesModal .info-icon {
+        width: 45px;
+        height: 45px;
+        margin: 0 auto 15px;
+    }
+    
+    #noChangesModal .info-icon .icon {
+        font-size: 22px;
+    }
+    
+    #noChangesModal .no-changes h2 {
+        font-size: 22px;
+    }
+    
+    #noChangesModal .no-changes p {
+        font-size: 15px;
+    }
+    
+    #noChangesModal .ok-btn {
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+    #noChangesModal .modal-content.no-changes {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    #noChangesModal .no-changes h2 {
+        color: #f1f5f9;
+    }
+    
+    #noChangesModal .no-changes p {
+        color: #94a3b8;
+    }
+    
+    #noChangesModal .close-no-changes {
+        color: #64748b;
+    }
+    
+    #noChangesModal .close-no-changes:hover {
+        color: #ef4444;
+        background-color: rgba(239, 68, 68, 0.2);
+    }
+}
+
 

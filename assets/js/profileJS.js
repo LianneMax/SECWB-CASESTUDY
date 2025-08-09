@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+
+
     // Function to generate time slots in 30-minute intervals
     function generateTimeSlots(startTime, endTime) {
         let slots = [];
@@ -70,7 +72,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-
     // Populate tables dynamically
     populateTable(currentReservations, currentTableBody, true);
     populateTable(recentReservations, recentTableBody, false);
@@ -117,9 +118,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     fetchReservations();
 });
 
-
 document.addEventListener("DOMContentLoaded", function () {
-
+    // Store original values when the modal opens
+    let originalValues = {};
+    
     // ========== MODAL ELEMENTS ==========
     var editProfileModal = document.getElementById("editProfileModal");
     var saveChangesModal = document.getElementById("saveChangesModal");
@@ -127,6 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var accountDeletedModal = document.getElementById("accountDeletedModal");
     var changePasswordModal = document.getElementById("changePasswordModal");
     var successChangesModal = document.getElementById("successChangesModal");
+    var noChangesModal = document.getElementById("noChangesModal");
 
     var editProfileBtn = document.getElementById("editProfileBtn");
     var deleteAccountBtn = document.getElementById("deleteAccountBtn");
@@ -137,12 +140,16 @@ document.addEventListener("DOMContentLoaded", function () {
     var cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
     var goBackHomeBtn = document.getElementById("goBackHomeBtn");
     var goBackProfileBtn = document.getElementById("goBackProfileBtn");
+    var okBtn = document.getElementById("okBtn");
 
     var closeEditProfileBtn = document.querySelector("#editProfileModal .close"); // X button for profile
+
+    var closeEditProfileBtn = document.querySelector("#editProfileModal .close");
     var closeDeleteAccount = document.querySelector("#deleteAccountModal .close");
     var closeSuccessChangesBtn = document.querySelector("#successChangesModal .close");
     var closeChangePasswordBtn = document.querySelector("#changePasswordModal .close");
     var closeSaveChangesBtn = document.querySelector("#saveChangesModal .close-confirm");
+    var closeNoChangesBtn = document.querySelector("#noChangesModal .close-no-changes");
 
     var cancelSaveChangesBtn = document.getElementById("cancelBtn");
     var confirmSaveChangesBtn = document.getElementById("leaveBtn");
@@ -158,10 +165,119 @@ document.addEventListener("DOMContentLoaded", function () {
         if (modal) modal.style.display = "none";
     }
 
+    // ========== STORE ORIGINAL VALUES ==========
+    function storeOriginalValues() {
+        const firstNameInput = document.querySelector('input[name="first_name"]');
+        const lastNameInput = document.querySelector('input[name="last_name"]');
+        const descriptionInput = document.querySelector('textarea[name="description"]');
+        
+        originalValues = {
+            first_name: firstNameInput ? (firstNameInput.placeholder || '').trim() : '',
+            last_name: lastNameInput ? (lastNameInput.placeholder || '').trim() : '',
+            description: descriptionInput ? (descriptionInput.placeholder || '').trim() : ''
+        };
+        
+        console.log("Original values stored:", originalValues);
+    }
+
+    // ========== CHECK FOR CHANGES ==========
+    function hasChanges() {
+        const firstNameInput = document.querySelector('input[name="first_name"]');
+        const lastNameInput = document.querySelector('input[name="last_name"]');
+        const descriptionInput = document.querySelector('textarea[name="description"]');
+        
+        const currentValues = {
+            first_name: firstNameInput ? firstNameInput.value.trim() : '',
+            last_name: lastNameInput ? lastNameInput.value.trim() : '',
+            description: descriptionInput ? descriptionInput.value.trim() : ''
+        };
+
+        console.log("Current values:", currentValues);
+        console.log("Original values:", originalValues);
+
+        // A change is detected if:
+        // 1. The input has a non-empty value AND
+        // 2. That value is different from the original placeholder value
+        const hasFirstNameChange = currentValues.first_name !== '' && 
+                                currentValues.first_name !== originalValues.first_name;
+        const hasLastNameChange = currentValues.last_name !== '' && 
+                                currentValues.last_name !== originalValues.last_name;
+        const hasDescriptionChange = currentValues.description !== '' && 
+                                    currentValues.description !== originalValues.description;
+
+        const changes = {
+            firstNameChanged: hasFirstNameChange,
+            lastNameChanged: hasLastNameChange,
+            descriptionChanged: hasDescriptionChange
+        };
+
+        console.log("Changes detected:", changes);
+
+        const hasAnyChanges = hasFirstNameChange || hasLastNameChange || hasDescriptionChange;
+        console.log("Has any changes:", hasAnyChanges);
+
+        return hasAnyChanges;
+    }
+
+    // ========== CLEAR FORM INPUTS ==========
+    function clearFormInputs() {
+        const firstNameInput = document.querySelector('input[name="first_name"]');
+        const lastNameInput = document.querySelector('input[name="last_name"]');
+        const descriptionInput = document.querySelector('textarea[name="description"]');
+        
+        if (firstNameInput) firstNameInput.value = '';
+        if (lastNameInput) lastNameInput.value = '';
+        if (descriptionInput) descriptionInput.value = '';
+    }
+
+    // ========== UPDATE DISPLAYED VALUES ==========
+    function updateDisplayedValues(firstName, lastName, description) {
+        // Update the profile name display in header
+        const profileNameElement = document.querySelector('.profile-name');
+        if (profileNameElement && (firstName || lastName)) {
+            const currentNameParts = profileNameElement.textContent.trim().split(' ');
+            const newFirstName = firstName || currentNameParts[0] || '';
+            const newLastName = lastName || currentNameParts.slice(1).join(' ') || '';
+            profileNameElement.textContent = `${newFirstName} ${newLastName}`.trim();
+        }
+
+        // Update the modal profile name
+        const modalProfileName = document.querySelector('.profile-text h3');
+        if (modalProfileName && (firstName || lastName)) {
+            const currentNameParts = modalProfileName.textContent.trim().split(' ');
+            const newFirstName = firstName || currentNameParts[0] || '';
+            const newLastName = lastName || currentNameParts.slice(1).join(' ') || '';
+            modalProfileName.textContent = `${newFirstName} ${newLastName}`.trim();
+        }
+
+        // Update the description display
+        const subsections = document.querySelectorAll('.subsection-container');
+        subsections.forEach(section => {
+            const title = section.querySelector('.subsection-title');
+            if (title && title.textContent.trim() === 'Description') {
+                const content = section.querySelector('.subsection-content');
+                if (content && description) {
+                    content.textContent = description;
+                }
+            }
+        });
+
+        // Update placeholders for future edits
+        const firstNameInput = document.querySelector('input[name="first_name"]');
+        const lastNameInput = document.querySelector('input[name="last_name"]');
+        const descriptionInput = document.querySelector('textarea[name="description"]');
+        
+        if (firstName && firstNameInput) firstNameInput.placeholder = firstName;
+        if (lastName && lastNameInput) lastNameInput.placeholder = lastName;
+        if (description && descriptionInput) descriptionInput.placeholder = description;
+    }
+
     // ========== OPEN MODALS ==========
     if (editProfileBtn && editProfileModal) {
         editProfileBtn.addEventListener("click", function () {
-            editProfileModal.style.display = "flex"; // Show the modal
+            editProfileModal.style.display = "flex";
+            storeOriginalValues(); // Store original values when modal opens
+            clearFormInputs(); // Clear any previous input values
         });
     }
 
@@ -177,11 +293,29 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // ========== ENHANCED SAVE CHANGES ==========
     if (saveChangesBtn) {
-        saveChangesBtn.addEventListener("click", async function () {
-            const first_name = document.getElementById("first_name").value;
-            const last_name = document.getElementById("last_name").value;
-            const description = document.getElementById("description").value;
+        saveChangesBtn.addEventListener("click", async function (event) {
+            event.preventDefault(); // Prevent default form submission
+            
+            console.log("Save changes button clicked");
+            
+            // Check if there are any changes
+            if (!hasChanges()) {
+                console.log("No changes detected, showing no changes modal");
+                showModal(noChangesModal);
+                return;
+            }
+
+            console.log("Changes detected, proceeding with save");
+
+            const firstNameInput = document.querySelector('input[name="first_name"]');
+            const lastNameInput = document.querySelector('input[name="last_name"]');
+            const descriptionInput = document.querySelector('textarea[name="description"]');
+
+            const first_name = firstNameInput ? firstNameInput.value.trim() : '';
+            const last_name = lastNameInput ? lastNameInput.value.trim() : '';
+            const description = descriptionInput ? descriptionInput.value.trim() : '';
 
             try {
                 const response = await fetch("/submit-profile-details", {
@@ -193,9 +327,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 const data = await response.json();
 
                 if (data.success) {
+                    console.log("Profile updated successfully");
                     hideModal(editProfileModal);
                     showModal(successChangesModal);
+                    
+                    // Update the displayed values on the page
+                    updateDisplayedValues(first_name, last_name, description);
+                    
+                    // Clear form inputs after successful save
+                    clearFormInputs();
                 } else {
+                    console.error("Error updating profile:", data.message);
                     alert("Error updating profile: " + (data.message || "Unknown error."));
                 }
             } catch (error) {
@@ -205,10 +347,28 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // ========== NO CHANGES MODAL HANDLERS ==========
+    if (okBtn) {
+        okBtn.addEventListener("click", function () {
+            hideModal(noChangesModal);
+        });
+    }
+
+    if (closeNoChangesBtn) {
+        closeNoChangesBtn.addEventListener("click", function () {
+            hideModal(noChangesModal);
+        });
+    }
+
     // ========== CLOSE PROFILE WITH UNSAVED CHANGES ==========
     if (closeEditProfileBtn) {
         closeEditProfileBtn.addEventListener("click", function () {
-            showModal(saveChangesModal); // Show "Save Changes Confirmation Modal"
+            if (hasChanges()) {
+                showModal(saveChangesModal);
+            } else {
+                hideModal(editProfileModal);
+                clearFormInputs();
+            }
         });
     }
 
@@ -217,6 +377,7 @@ document.addEventListener("DOMContentLoaded", function () {
         confirmSaveChangesBtn.addEventListener("click", function () {
             hideModal(saveChangesModal);
             hideModal(editProfileModal);
+            clearFormInputs();
         });
     }
 
@@ -224,20 +385,26 @@ document.addEventListener("DOMContentLoaded", function () {
     if (confirmDeleteBtn) {
         confirmDeleteBtn.addEventListener("click", async function () {
             try {
+                const currentPassword = document.getElementById("delete-current-password").value;
+                
                 const response = await fetch("/deleteaccount", {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" }
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ currentPassword })
                 });
 
-                if (response.ok) {
+                const data = await response.json();
+
+                if (response.ok && data.message) {
                     hideModal(deleteAccountModal);
                     showModal(accountDeletedModal);
                 } else {
-                    console.error("⚠️ Error deleting account.");
+                    alert("Error deleting account: " + (data.message || "Please check your password."));
                 }
 
             } catch (error) {
-                window.location.href = "/profile";
+                console.error("Error deleting account:", error);
+                alert("An error occurred while deleting your account.");
             }
         });
     }
@@ -279,22 +446,19 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    if (submitPasswordBtn) {
-        submitPasswordBtn.addEventListener("click", function () {
-            hideModal(changePasswordModal);
-            showModal(editProfileModal);
-        });
-    }
-
     if (closeSuccessChangesBtn) {
         closeSuccessChangesBtn.addEventListener("click", function () {
             hideModal(successChangesModal);
+            // Optionally reload the page to show updated data
+            window.location.reload();
         });
     }
 
     if (goBackProfileBtn) {
         goBackProfileBtn.addEventListener("click", function () {
             hideModal(successChangesModal);
+            // Optionally reload the page to show updated data
+            window.location.reload();
         });
     }
 
@@ -309,87 +473,35 @@ document.addEventListener("DOMContentLoaded", function () {
         if (event.target === saveChangesModal) {
             hideModal(saveChangesModal);
         }
-    });
-
-// ========== DELETE ACCOUNT CONFIRMATION (FIXED) ==========
-if (confirmDeleteBtn) {
-    confirmDeleteBtn.addEventListener("click", async function () {
-        try {
-            const response = await fetch("/deleteaccount", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" }
-            });
-
-            if (response.ok) {
-                hideModal(deleteAccountModal); // Close delete confirmation modal
-                showModal(accountDeletedModal); // Show "Account Successfully Deleted" modal
+        if (event.target === noChangesModal) {
+            hideModal(noChangesModal);
+        }
+        if (event.target === editProfileModal) {
+            if (hasChanges()) {
+                showModal(saveChangesModal);
             } else {
-                console.error("⚠️ Error deleting account.");
+                hideModal(editProfileModal);
+                clearFormInputs();
             }
-
-        } catch (error) {
-            console.error("⚠️ Error deleting account:", error);
         }
     });
-}
-
-// ========== REDIRECT ONLY WHEN "GO BACK TO HOME PAGE" IS CLICKED ==========
-if (goBackHomeBtn) {
-    goBackHomeBtn.addEventListener("click", function () {
-        window.location.href = "/"; // Redirect to home only when this button is clicked
-    });
-}
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    var saveChangesBtn = document.getElementById("saveChanges");
-
-    if (saveChangesBtn) {
-        saveChangesBtn.addEventListener("click", async function () {
-            const first_name = document.getElementById("first_name").value;
-            const last_name = document.getElementById("last_name").value;
-            const description = document.getElementById("description").value;
-
-            try {
-                const response = await fetch("/profile", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ first_name, last_name, description })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    alert("✅ Profile updated successfully!");
-                    hideModal(editProfileModal);
-                } else {
-                    alert("❌ Error updating profile: " + data.message);
-                }
-            } catch (error) {
-                console.error("⚠️ Error updating profile:", error);
-                alert("⚠️ An error occurred. Please try again.");
-            }
-        });
-    }
-});
-
+// ========== UPLOAD PHOTO FUNCTIONALITY ==========
 document.addEventListener("DOMContentLoaded", function () {
     const uploadPhotoBtn = document.getElementById("uploadPhotoBtn");
     const profileInput = document.getElementById("profileInput");
     const editProfileModal = document.getElementById("editProfileModal");
 
     if (uploadPhotoBtn && profileInput) {
-        // Clicking the button opens the file picker
         uploadPhotoBtn.addEventListener("click", function () {
             profileInput.click();
         });
 
-        // When a file is selected, submit the form automatically
         profileInput.addEventListener("change", function () {
             if (profileInput.files.length > 0) {
-                profileInput.closest("form").submit(); // Auto-submit form
+                profileInput.closest("form").submit();
 
-                // Close modal after submitting
                 if (editProfileModal) {
                     editProfileModal.style.display = "none";
                 }
@@ -397,5 +509,3 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
-
-
