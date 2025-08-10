@@ -927,7 +927,7 @@ body {
 }
 
 #noChangesModal .close-no-changes:hover {
-    color: #ef4444;
+    color: #900B09;
     background-color: rgba(239, 68, 68, 0.1);
     transform: scale(1.1);
 }
@@ -1046,7 +1046,7 @@ body {
     }
     
     #noChangesModal .close-no-changes:hover {
-        color: #ef4444;
+        color: #900B09;
         background-color: rgba(239, 68, 68, 0.2);
     }
 }
