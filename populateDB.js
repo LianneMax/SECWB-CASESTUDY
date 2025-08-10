@@ -118,6 +118,9 @@ async function insertUsers() {
     try {
         await User.findOneAndUpdate({ email: admin1.email }, admin1, { upsert: true, new: true })
         await User.findOneAndUpdate({ email: admin2.email }, admin2, { upsert: true, new: true })
+        await User.findOneAndUpdate({ email: staff1.email }, staff1, { upsert: true, new: true })
+        await User.findOneAndUpdate({ email: staff2.email }, staff2, { upsert: true, new: true })
+        await User.findOneAndUpdate({ email: staff3.email }, staff3, { upsert: true, new: true })
         await User.findOneAndUpdate({ email: student1.email }, student1, { upsert: true, new: true })
         await User.findOneAndUpdate({ email: student2.email }, student2, { upsert: true, new: true })
         await User.findOneAndUpdate({ email: student3.email }, student3, { upsert: true, new: true })
