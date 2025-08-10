@@ -139,11 +139,14 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Show the delete confirmation modal (exactly like labtech)
+    // Show the delete confirmation modal
     function showDeleteConfirmation(reservationId) {
+        console.log("🗑️ Showing delete confirmation for reservation ID:", reservationId);
+        
         const reservation = reservations.find(res => res.id === reservationId);
         if (!reservation) {
             console.error("❌ Reservation not found.");
+            alert("Error: Reservation not found!");
             return;
         }
 
@@ -158,6 +161,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const cancelDeleteBtn = document.querySelector(".deleteCancel-button");
         const closeButton = document.querySelector(".close-button");
 
+        if (!deleteModalOverlay) {
+            console.error("❌ Delete modal overlay not found!");
+            alert("Error: Delete modal not found in DOM!");
+            return;
+        }
+
         // Populate modal with reservation details
         roomSpan.textContent = reservation.roomNumber;
         seatSpan.textContent = reservation.seatNumber;
@@ -165,9 +174,10 @@ document.addEventListener("DOMContentLoaded", function () {
         timeSpan.textContent = generateTimeSlot(reservation.time);
         reservedBySpan.textContent = "You"; // For dashboard, always show "You"
 
-        // Show the modal
-        deleteModalOverlay.style.visibility = "visible";
-        deleteModalOverlay.style.opacity = "1";
+        // Show the modal using CSS class instead of inline styles
+        deleteModalOverlay.classList.add("active");
+
+        console.log("✅ Delete modal should now be visible");
 
         // Remove old event listeners by cloning buttons
         const newConfirmBtn = confirmDeleteBtn.cloneNode(true);
@@ -182,11 +192,17 @@ document.addEventListener("DOMContentLoaded", function () {
         newConfirmBtn.onclick = async function () {
             console.log("🗑️ Deleting reservation with ID:", reservationId);
 
+            // Show loading state
+            newConfirmBtn.textContent = "Deleting...";
+            newConfirmBtn.disabled = true;
+
             try {
                 const response = await fetch(`/reservations/${reservationId}`, {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" }
                 });
+
+                console.log("🔄 Delete response status:", response.status);
 
                 if (response.ok) {
                     console.log("✅ Reservation deleted successfully.");
@@ -197,10 +213,26 @@ document.addEventListener("DOMContentLoaded", function () {
                         rowToRemove.remove();
                     }
 
+                    // Remove from reservations array
+                    reservations = reservations.filter(res => res.id !== reservationId);
+
+                    // Check if table is empty
+                    const remainingRows = currentTableBody.querySelectorAll('tr').length;
+                    if (remainingRows === 0) {
+                        currentTableBody.innerHTML = `<tr><td colspan="5">No upcoming reservations.</td></tr>`;
+                    }
+
                     closeDeleteModal();
+                    alert("✅ Reservation deleted successfully!");
+
                 } else {
                     const errorData = await response.json();
                     console.error("⚠️ Failed to delete reservation:", errorData);
+                    
+                    // Reset button state
+                    newConfirmBtn.textContent = "Confirm";
+                    newConfirmBtn.disabled = false;
+                    
                     if (response.status === 403) {
                         alert("❌ You can only delete your own reservations.");
                     } else {
@@ -209,14 +241,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             } catch (error) {
                 console.error("⚠️ Error deleting reservation:", error);
+                
+                // Reset button state
+                newConfirmBtn.textContent = "Confirm";
+                newConfirmBtn.disabled = false;
+                
                 alert("An error occurred. Please try again later.");
             }
         };
 
         // Function to close the delete modal
         function closeDeleteModal() {
-            deleteModalOverlay.style.visibility = "hidden";
-            deleteModalOverlay.style.opacity = "0";
+            console.log("🔒 Closing delete modal");
+            deleteModalOverlay.classList.remove("active");
         }
 
         // Close the delete modal when clicking outside the modal content

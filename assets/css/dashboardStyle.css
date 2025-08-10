@@ -368,26 +368,26 @@
   color: white;
 }
 
-/* ------------------------- Delete Modal Styles - Updated to match LabTech ------------------------- */
+/* ------------------------- Delete Modal Styles - Fixed ------------------------- */
 .delete-modal-overlay {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background: rgba(0, 0, 0, 0.5) !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    z-index: 9999 !important;
-    transition: opacity 0.3s ease !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+    opacity: 0;
+    z-index: 9999;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .delete-modal-overlay.active {
-    visibility: visible !important;
-    opacity: 1 !important;
+    visibility: visible;
+    opacity: 1;
 }
 
 .delete-modal {
@@ -455,8 +455,8 @@
 }
 
 .delete-warning {
-    color: #900B09 !important;
-    font-weight: 500 !important;
+    color: #900B09;
+    font-weight: 500;
 }
 
 .delete-buttons {
@@ -491,17 +491,4 @@
 .confirm-button:hover {
     background-color: #1d5b3e;
     color: white;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .edit-container {
-    max-width: 100%;
-    padding: 1.5rem;
-  }
-
-  .date-time-container {
-    flex-direction: column;
-    gap: 20px;
-  }
 }
