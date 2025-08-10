@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Logs - Lab Tech Dashboard</title>
+    
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/styleguide.css">
+    <link rel="stylesheet" href="css/logs.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header-lab">
+        <div class="logo-container">
+            <img src="images/LabyrinthLogo.png" alt="Labyrinth Logo" onclick="window.location.href='/labtech'">
+        </div>
+        <div class="labyrinthHeader">Labyrinth - System Logs</div>
+        <div class="profile-dropdown">
+            <img class="profile-icon" src="{{userData.profile_picture}}" alt="Profile" id="profileDropdownBtn">
+            <div class="dropdown-menu" id="profileDropdown">
+                <a href="/profile">Go to Profile</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="logs-container">
+        <div class="page-header">
+            <h1 class="page-title">System Activity Logs</h1>
+            <p class="page-subtitle">Monitor all reservation activities and user actions</p>
+            <button class="back-button" onclick="window.location.href='/labtech'">← Back to Dashboard</button>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <h3 class="filter-title">Filter Logs</h3>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="dateFrom">From Date:</label>
+                    <input type="date" id="dateFrom">
+                </div>
+                <div class="filter-group">
+                    <label for="dateTo">To Date:</label>
+                    <input type="date" id="dateTo">
+                </div>
+                <div class="filter-group">
+                    <label for="actionFilter">Action Type:</label>
+                    <select id="actionFilter">
+                        <option value="">All Actions</option>
+                        <option value="create">Create</option>
+                        <option value="edit">Edit</option>
+                        <option value="delete">Delete</option>
+                        <option value="login">Login</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="userFilter">User:</label>
+                    <input type="text" id="userFilter" placeholder="Enter username or email">
+                </div>
+                <button class="filter-button" onclick="applyFilters()">Apply Filters</button>
+                <button class="clear-button" onclick="clearFilters()">Clear</button>
+            </div>
+        </div>
+
+        <!-- Logs Table -->
+        <div class="logs-section">
+            <div class="logs-header">Activity Log History</div>
+            <div class="logs-table-container">
+                <table class="logs-table" id="logsTable">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Action</th>
+                            <th>User</th>
+                            <th>Room</th>
+                            <th>Seat</th>
+                            <th>Date/Time</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <!-- Sample data for demonstration - replace with dynamic data -->
+                        <tr>
+                            <td>2025-01-15 14:30:22</td>
+                            <td><span class="log-level create">Create</span></td>
+                            <td>staff@dlsu.edu.ph</td>
+                            <td>Room 101</td>
+                            <td>Seat 5</td>
+                            <td>2025-01-16 09:00-10:00</td>
+                            <td>Walk-in reservation created</td>
+                        </tr>
+                        <tr>
+                            <td>2025-01-15 13:45:15</td>
+                            <td><span class="log-level edit">Edit</span></td>
+                            <td>labtech@dlsu.edu.ph</td>
+                            <td>Room 102</td>
+                            <td>Seat 3</td>
+                            <td>2025-01-16 10:00-11:00</td>
+                            <td>Time slot changed from 09:00-10:00</td>
+                        </tr>
+                        <tr>
+                            <td>2025-01-15 12:20:08</td>
+                            <td><span class="log-level delete">Delete</span></td>
+                            <td>labtech@dlsu.edu.ph</td>
+                            <td>Room 103</td>
+                            <td>Seat 1</td>
+                            <td>2025-01-15 14:00-15:00</td>
+                            <td>Reservation cancelled by admin</td>
+                        </tr>
+                        <tr>
+                            <td>2025-01-15 11:15:32</td>
+                            <td><span class="log-level login">Login</span></td>
+                            <td>student@dlsu.edu.ph</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>User logged into system</td>
+                        </tr>
+                        <tr>
+                            <td>2025-01-15 10:30:45</td>
+                            <td><span class="log-level create">Create</span></td>
+                            <td>student@dlsu.edu.ph</td>
+                            <td>Room 104</td>
+                            <td>Seat 8</td>
+                            <td>2025-01-16 15:00-16:00</td>
+                            <td>Online reservation created</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/common.js"></script>
+    <script src="js/logs.js"></script>
+</body>
+</html>

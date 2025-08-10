@@ -48,7 +48,7 @@
   border-radius: 24px;
   padding: 10px;
   align-content: center;
-  height: 55%;
+  height: 60%;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
 }
@@ -77,7 +77,7 @@
 }
 
 .right-side {
-  margin-top: 115px;
+  margin-top: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -104,7 +104,7 @@
   padding: 20px;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.1s ease-in-out; /* Smooth transition */
+  transition: transform 0.1s ease-in-out;
 }
 
 /* Reserve Button */
@@ -619,12 +619,19 @@
   border-radius: 24px;
   padding: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s ease-in-out;
 }
+
+.labTechInfo:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
 
 .labTechDetails h3 {
   color: #3B6B53;
   font-family: "Outfit", sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   margin-bottom: 15px;
   text-align: center;
 }
@@ -632,6 +639,7 @@
 .labTechDetails p {
   font-family: "Outfit", sans-serif;
   color: #595858;
+  font-size: 14px;
   margin-bottom: 8px;
 }
 
@@ -646,4 +654,57 @@
 .labTechAccessLevel small {
   color: #6c757d;
   font-style: italic;
+  font-size: 14px;
+}
+
+/* Updated Logs Button CSS - Add this to your labtechStyle.css */
+.logsButton {
+  width: 100%;
+  max-width: 400px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out;
+  border: none;
+  font-family: "Outfit", sans-serif;
+  margin-bottom: 15px;
+}
+
+.logsButton:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* New flexbox container for icon and title */
+.logs-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.logs-icon {
+    display: flex;
+    align-items: center;
+}
+
+.logs-icon i {
+    font-size: 1.8rem;
+    color: #3B6B53;
+}
+
+.logsButton h3 {
+  color: #3B6B53;
+  font-size: 18px;
+  margin: 0; /* Remove default margins */
+}
+
+.logsButton p {
+  color: #595858;
+  font-size: 14px;
+  margin: 0;
 }

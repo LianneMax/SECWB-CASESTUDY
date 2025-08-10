@@ -422,6 +422,44 @@ app.get('/about-us', function(req,res){
     res.sendFile(__dirname + '/' + 'about-us.html')
 })
 
+// Route to logs.hbs
+// localhost:3000/logs
+// Replace your existing logs route with this debugging version:
+
+app.get('/logs', (req, res) => {
+    console.log('🔍 LOGS ROUTE HIT - Starting debugging...');
+    console.log('📋 Session user:', req.session.user);
+    console.log('🔑 User account type:', req.session.user?.account_type);
+    console.log('✅ Is authenticated:', !!req.session.user);
+    
+    if (!req.session.user) {
+        console.log('❌ No user session - redirecting to login');
+        return res.redirect('/login');
+    }
+    
+    if (req.session.user.account_type !== 'Lab Technician') {
+        console.log('❌ Not a Lab Technician - serving 403');
+        console.log('📊 Expected: "Lab Technician", Got:', req.session.user.account_type);
+        return res.status(403).sendFile(path.join(__dirname, '403.html'));
+    }
+    
+    console.log('✅ All checks passed - rendering logs template');
+    console.log('📁 Looking for template: logs.hbs');
+    console.log('👤 Passing userData:', {
+        email: req.session.user.email,
+        account_type: req.session.user.account_type,
+        first_name: req.session.user.first_name
+    });
+    
+    try {
+        res.render('logs', { userData: req.session.user });
+        console.log('✅ Template rendered successfully');
+    } catch (error) {
+        console.error('❌ Error rendering template:', error);
+        res.status(500).send('Template error: ' + error.message);
+    }
+});
+
 // Route to register.html
 // localhost:3000/register
 app.get('/register', function(req,res){
