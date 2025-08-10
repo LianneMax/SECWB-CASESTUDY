@@ -74,39 +74,61 @@
   color: white;
 }
 
-.reservationContainer .edit-button {
-  display: block;  
-  margin: auto;  
-  padding: 10px 60px;
-  font-family: "Newsreader", serif; 
-  font-size: 16px;
-  text-align: center;
-  border-radius: 5px;
-  background-color: #2D2D2D;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
+/* Updated Button Styles - Matching LabTech inline layout */
+.reservationContainer .editButton,
+.reservationContainer .deleteButton {
+    display: inline-block;
+    margin: 2px 5px;
+    padding: 10px 60px;
+    font-family: "Newsreader", serif; 
+    font-size: 16px;
+    text-align: center;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 80px;
 }
 
-.reservationContainer .edit-button:hover {
-  background-color: white;
-  color: #2D2D2D;
-  border: 1px solid #2D2D2D; 
+.reservationContainer .editButton {
+    background-color: #2D2D2D;
+    color: white;
+}
+
+.reservationContainer .editButton:hover {
+    background-color: white;
+    color: #2D2D2D;
+    border: 1px solid #2D2D2D;
+}
+
+.reservationContainer .deleteButton {
+    background-color: #900B09;
+    color: white;
+}
+
+.reservationContainer .deleteButton:hover {
+    background-color: white;
+    color: #900B09;
+    border: 1px solid #900B09;
+}
+
+/* Hide old edit-button style to avoid conflicts */
+.reservationContainer .edit-button {
+    display: none;
 }
 
 .button-container {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 10px;
+    padding: 5px;
 }
 
 /* Right Side - Stack Content Vertically */
-
-
 .right-side {
   display: flex;
-  flex-direction: column; /* Ensures stacked layout */
+  flex-direction: column;
   align-items: center;
   gap: 15px; 
 }
@@ -149,7 +171,7 @@
   border-radius: 10px;
 }
 
-/* Reserve Now Container */
+/* Reserve Now Container - Consolidated duplicate styles */
 .reserveContainer {
   width: 100%;
   max-width: 400px;
@@ -159,6 +181,12 @@
   padding: 20px;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s ease-in-out;
+}
+
+.reserveContainer:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Reserve Button */
@@ -197,25 +225,6 @@
 .reserveButton:hover {
   background-color: #cccccc;
   color: black;
-}
-
-/* Default Style */
-.reserveContainer {
-  width: 100%;
-  max-width: 400px;
-  height: 360px;
-  background: #377684;
-  border-radius: 24px;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.1s ease-in-out; /* Smooth transition */
-}
-
-/* Pop Effect on Hover */
-.reserveContainer:hover {
-  transform: scale(1.02); /* Slightly enlarges */
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Adds depth */
 }
 
 /* ------------------------- Edit Overlay Styles ------------------------- */
@@ -318,12 +327,12 @@
   font-family: outfit;
   margin-top: 10px;
   padding: 1rem;
-  border: 1px solid #ccc; /* Light gray border */
-  border-radius: 8px; /* Rounded corners */
+  border: 1px solid #ccc;
+  border-radius: 8px;
   color: #595858;
   text-align: center;
   width: 100%;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Adds subtle shadow */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* Buttons */
@@ -350,13 +359,138 @@
 }
 
 #saveButton:hover {
-  background: #1d5b3e; /* Darker gray on hover */
+  background: #1d5b3e;
   color: white;
 }
 
 #cancelButton:hover {
   background-color: #900B09;
   color: white;
+}
+
+/* ------------------------- Delete Modal Styles - Updated to match LabTech ------------------------- */
+.delete-modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    z-index: 9999 !important;
+    transition: opacity 0.3s ease !important;
+}
+
+.delete-modal-overlay.active {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.delete-modal {
+    background: white;
+    border-radius: 12px;
+    width: 500px;
+    max-width: 90%;
+    padding: 24px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    text-align: center;
+    font-family: "Outfit", sans-serif;
+}
+
+.delete-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.delete-icon {
+    width: 30px;
+    height: 30px;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: #999;
+    padding: 5px;
+}
+
+.close-button:hover {
+    color: #333;
+}
+
+.delete-modal h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #900B09;
+    margin-top: 10px;
+    text-align: left;
+}
+
+.delete-details {
+    text-align: left;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.delete-details p {
+    margin: 8px 0;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    color: #555;
+}
+
+.delete-warning {
+    color: #900B09 !important;
+    font-weight: 500 !important;
+}
+
+.delete-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.deleteCancel-button,
+.cancel-button,
+.confirm-button {
+    font-family: "Outfit", sans-serif;
+    width: 45%;
+    padding: 10px;
+    background: white;
+    color: #3C4B5F;
+    font-size: 16px;
+    border: 1px solid #D1D5DB;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.deleteCancel-button:hover,
+.cancel-button:hover {
+    background-color: #900B09;
+    color: white;
+}
+
+.confirm-button:hover {
+    background-color: #1d5b3e;
+    color: white;
 }
 
 /* Responsive Design */
@@ -371,4 +505,3 @@
     gap: 20px;
   }
 }
-

@@ -10,6 +10,20 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    let reservations = []; // Store reservations data
+    let currentUser = null; // Store current user data
+
+    // Fetch current user data
+    async function fetchCurrentUser() {
+        try {
+            const response = await fetch("/get-current-user");
+            currentUser = await response.json();
+            console.log("👤 Current user loaded:", currentUser);
+        } catch (error) {
+            console.error("⚠️ Error fetching current user:", error);
+        }
+    }
+
     function formatDate(dateString) {
         const date = new Date(dateString);
         return date.toLocaleDateString("en-US", {
@@ -19,25 +33,29 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function formatTimeSlot(timeString) {
-        if (!timeString) return "";
-
+    function formatTime(timeString) {
         const [hour, minute] = timeString.split(":").map(Number);
-        const startTime = new Date();
-        startTime.setHours(hour, minute, 0, 0);
+        const date = new Date();
+        date.setHours(hour, minute, 0);
 
-        const endTime = new Date(startTime);
-        endTime.setMinutes(startTime.getMinutes() + 30);
-
-        return `${format12HourTime(startTime)} - ${format12HourTime(endTime)}`;
-    }
-
-    function format12HourTime(date) {
         let hours = date.getHours();
-        let minutes = String(date.getMinutes()).padStart(2, "0");
+        let minutes = date.getMinutes();
         let ampm = hours >= 12 ? "PM" : "AM";
         hours = hours % 12 || 12;
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+
         return `${hours}:${minutes} ${ampm}`;
+    }
+
+    function generateTimeSlot(startTime) {
+        const [hour, minute] = startTime.split(":").map(Number);
+        const startDate = new Date();
+        startDate.setHours(hour, minute, 0);
+
+        let endDate = new Date(startDate);
+        endDate.setMinutes(startDate.getMinutes() + 30);
+
+        return `${formatTime(startTime)} - ${formatTime(`${endDate.getHours()}:${endDate.getMinutes()}`)}`;
     }
 
     function fetchUserReservations() {
@@ -47,6 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => response.json())
             .then(data => {
                 console.log("📥 Reservations received from server:", data);
+                reservations = data; // Store the data
 
                 currentTableBody.innerHTML = ""; // Clear existing rows
                 if (data.length === 0) {
@@ -66,57 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     return;
                 }
 
-                futureReservations.forEach(reservation => {
-                    console.log(`📝 Processing reservation:`, reservation);
-
-                    const row = currentTableBody.insertRow();
-                    row.insertCell(0).innerText = reservation.roomNumber;
-                    row.insertCell(1).innerText = reservation.seatNumber;
-                    row.insertCell(2).innerText = formatDate(reservation.date);
-                    row.insertCell(3).innerText = formatTimeSlot(reservation.time);
-
-                    // Actions cell (Edit + Delete)
-                    const actionsCell = row.insertCell(4);
-
-                    // Button container for actions
-                    const buttonContainer = document.createElement("div");
-                    buttonContainer.className = "button-container";
-
-                    // Edit button
-                    const editButton = document.createElement("button");
-                    editButton.className = "edit-button";
-                    editButton.innerText = "Edit";
-                    editButton.onclick = function () {
-                        showEditOverlay(reservation);
-                    };
-                    buttonContainer.appendChild(editButton);
-
-                    // Delete button 
-                    const deleteButton = document.createElement("button");
-                    deleteButton.className = "edit-button"; // Use the same class for styling
-                    deleteButton.innerText = "Delete";
-                    deleteButton.onclick = async function () {
-                        if (confirm("Are you sure you want to delete this reservation?")) {
-                            try {
-                                const response = await fetch(`/reservations/${reservation.id}`, {
-                                    method: "DELETE"
-                                });
-                                const data = await response.json();
-                                if (response.ok) {
-                                    row.remove();
-                                    alert("Reservation deleted successfully.");
-                                } else {
-                                    alert(data.message || "Failed to delete reservation.");
-                                }
-                            } catch (error) {
-                                alert("Error deleting reservation.");
-                            }
-                        }
-                    };
-                    buttonContainer.appendChild(deleteButton);
-                    actionsCell.appendChild(buttonContainer);
-                });
-
+                renderTable(futureReservations);
                 console.log("✅ Reservations successfully displayed.");
             })
             .catch(error => {
@@ -124,27 +93,246 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    // EDIT OVERLAY
+    function renderTable(futureReservations) {
+        futureReservations.forEach((reservation, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${reservation.roomNumber}</td>
+                <td>${reservation.seatNumber}</td>
+                <td>${formatDate(reservation.date)}</td>
+                <td>${generateTimeSlot(reservation.time)}</td>
+                <td class="button-container">
+                    <button class="editButton" data-reservation-id="${reservation.id}">Edit</button>
+                    <button class="deleteButton" data-reservation-id="${reservation.id}">Delete</button>
+                </td>
+            `;
+            currentTableBody.appendChild(row);
+        });
+
+        // Attach event listeners to delete buttons
+        document.querySelectorAll(".deleteButton").forEach(button => {
+            button.addEventListener("click", function () {
+                const reservationId = this.getAttribute("data-reservation-id");
+                console.log("Delete button clicked for reservation ID:", reservationId);
+                if (reservationId) {
+                    showDeleteConfirmation(reservationId);
+                } else {
+                    console.error("⚠️ Reservation ID not found.");
+                }
+            });
+        });
+
+        // Attach event listeners to edit buttons
+        document.querySelectorAll(".editButton").forEach(button => {
+            button.addEventListener("click", function () {
+                const reservationId = this.getAttribute("data-reservation-id");
+                console.log("Edit button clicked for reservation ID:", reservationId);
+                if (reservationId) {
+                    const reservation = reservations.find(res => res.id === reservationId);
+                    if (reservation) {
+                        showEditOverlay(reservation);
+                    }
+                } else {
+                    console.error("⚠️ Reservation ID not found.");
+                }
+            });
+        });
+    }
+
+    // Show the delete confirmation modal (exactly like labtech)
+    function showDeleteConfirmation(reservationId) {
+        const reservation = reservations.find(res => res.id === reservationId);
+        if (!reservation) {
+            console.error("❌ Reservation not found.");
+            return;
+        }
+
+        // Get modal elements
+        const deleteModalOverlay = document.getElementById("deleteModal");
+        const roomSpan = document.getElementById("deleteRoom");
+        const seatSpan = document.getElementById("deleteSeat");
+        const dateSpan = document.getElementById("deleteDate");
+        const timeSpan = document.getElementById("deleteTime");
+        const reservedBySpan = document.getElementById("deleteReservedBy");
+        const confirmDeleteBtn = document.querySelector(".confirm-button");
+        const cancelDeleteBtn = document.querySelector(".deleteCancel-button");
+        const closeButton = document.querySelector(".close-button");
+
+        // Populate modal with reservation details
+        roomSpan.textContent = reservation.roomNumber;
+        seatSpan.textContent = reservation.seatNumber;
+        dateSpan.textContent = formatDate(reservation.date);
+        timeSpan.textContent = generateTimeSlot(reservation.time);
+        reservedBySpan.textContent = "You"; // For dashboard, always show "You"
+
+        // Show the modal
+        deleteModalOverlay.style.visibility = "visible";
+        deleteModalOverlay.style.opacity = "1";
+
+        // Remove old event listeners by cloning buttons
+        const newConfirmBtn = confirmDeleteBtn.cloneNode(true);
+        const newCancelBtn = cancelDeleteBtn.cloneNode(true);
+        const newCloseBtn = closeButton.cloneNode(true);
+
+        confirmDeleteBtn.parentNode.replaceChild(newConfirmBtn, confirmDeleteBtn);
+        cancelDeleteBtn.parentNode.replaceChild(newCancelBtn, cancelDeleteBtn);
+        closeButton.parentNode.replaceChild(newCloseBtn, closeButton);
+
+        // Handle Confirm button click to delete the reservation
+        newConfirmBtn.onclick = async function () {
+            console.log("🗑️ Deleting reservation with ID:", reservationId);
+
+            try {
+                const response = await fetch(`/reservations/${reservationId}`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" }
+                });
+
+                if (response.ok) {
+                    console.log("✅ Reservation deleted successfully.");
+
+                    // Find and remove the row from the table after deletion
+                    const rowToRemove = document.querySelector(`button[data-reservation-id="${reservationId}"]`).closest('tr');
+                    if (rowToRemove) {
+                        rowToRemove.remove();
+                    }
+
+                    closeDeleteModal();
+                } else {
+                    const errorData = await response.json();
+                    console.error("⚠️ Failed to delete reservation:", errorData);
+                    if (response.status === 403) {
+                        alert("❌ You can only delete your own reservations.");
+                    } else {
+                        alert("Failed to delete reservation: " + (errorData.message || "Please try again."));
+                    }
+                }
+            } catch (error) {
+                console.error("⚠️ Error deleting reservation:", error);
+                alert("An error occurred. Please try again later.");
+            }
+        };
+
+        // Function to close the delete modal
+        function closeDeleteModal() {
+            deleteModalOverlay.style.visibility = "hidden";
+            deleteModalOverlay.style.opacity = "0";
+        }
+
+        // Close the delete modal when clicking outside the modal content
+        deleteModalOverlay.onclick = function(event) {
+            if (event.target === deleteModalOverlay) {
+                closeDeleteModal();
+            }
+        };
+
+        // Close the delete modal when the Cancel button is clicked
+        newCancelBtn.onclick = function() {
+            closeDeleteModal();
+        };
+
+        // Close the delete modal when the "X" button is clicked
+        newCloseBtn.onclick = function() {
+            closeDeleteModal();
+        };
+    }
+
+    function generateTimeOptions(editTimeDropdown, selectedTime) {
+        editTimeDropdown.innerHTML = ""; // Clear previous options
+
+        const selectedHour = selectedTime ? selectedTime.split(":")[0] : null;
+        const selectedMinute = selectedTime ? selectedTime.split(":")[1] : null;
+
+        for (let hour = 8; hour < 19; hour++) {  // Available time slots: 8 AM to 7 PM
+            for (let minute of [0, 30]) {  // Increment in 30-minute intervals
+                let startTime = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+                let endTime = new Date();
+                endTime.setHours(hour);
+                endTime.setMinutes(minute + 30);
+
+                let timeLabel = `${startTime} - ${format24HourTime(endTime)}`; // Format as 24-hour time for dropdown
+
+                let option = document.createElement("option");
+                option.value = startTime;
+                option.textContent = timeLabel;
+
+                // Mark the current reservation time as selected
+                if (startTime === selectedTime) {
+                    option.selected = true;
+                }
+
+                editTimeDropdown.appendChild(option);
+            }
+        }
+    }
+
+    function format24HourTime(date) {
+        let hours = String(date.getHours()).padStart(2, "0");
+        let minutes = String(date.getMinutes()).padStart(2, "0");
+        return `${hours}:${minutes}`;
+    }
+
+    function closeEditOverlay() {
+        const editOverlay = document.querySelector(".edit-overlay");
+        editOverlay.classList.remove("active");
+    }
+
+    function updateTableRow(reservationId, newDate, newTime) {
+        // Find the row that contains the button with the specific reservationId
+        const row = document.querySelector(`button[data-reservation-id="${reservationId}"]`).closest('tr');
+        
+        if (row) {
+            // Format the new date and time for display in the table
+            const formattedDate = formatDate(newDate);
+            const formattedTime = generateTimeSlot(newTime);
+
+            // Update the relevant cells in the table (Date and Time columns)
+            row.cells[2].innerText = formattedDate;  // Date column
+            row.cells[3].innerText = formattedTime;  // Time column
+
+            console.log(`✅ Table row updated for reservation ID: ${reservationId}`);
+        } else {
+            console.error(`❌ Row not found for reservation ID: ${reservationId}`);
+        }
+    }
+
     function showEditOverlay(reservation) {
         console.log("🛠 Editing Reservation:", reservation);
 
-        document.querySelector(".edit-overlay").classList.add("active");
+        // Get the edit overlay and elements
+        const editOverlay = document.querySelector(".edit-overlay");
+        const editDateInput = document.querySelector("#edit-date");
+        const editTimeDropdown = document.querySelector("#edit-time");
+        const editRoom = document.querySelector("#edit-room");
+        const editSeat = document.querySelector("#edit-seat");
 
+        // Display the overlay
+        editOverlay.classList.add("active");
+
+        // Set the form inputs to the current reservation details
         editDateInput.value = reservation.date;
+        editDateInput.min = new Date().toISOString().split("T")[0]; // ✅ restrict to current day and onwards
 
-        generateTimeOptions();
+        generateTimeOptions(editTimeDropdown, reservation.time);
 
-        document.querySelector("#edit-room").innerText = `Room: ${reservation.roomNumber}`;
-        document.querySelector("#edit-seat").innerText = `Seat: ${reservation.seatNumber}`;
+        // Display room and seat info
+        editRoom.innerText = `Room: ${reservation.roomNumber}`;
+        editSeat.innerText = `Seat: ${reservation.seatNumber}`;
 
-        document.querySelector("#saveButton").onclick = async function () {
+        // Remove old event listener by cloning the save button
+        const saveButton = document.querySelector("#saveButton");
+        const newSaveButton = saveButton.cloneNode(true);
+        saveButton.parentNode.replaceChild(newSaveButton, saveButton);
+
+        // Handle save button click
+        newSaveButton.onclick = async function () {
             const newDate = editDateInput.value;
             const newTime = editTimeDropdown.value;
             const room = reservation.roomNumber;
             
             const tempSeat = reservation.seatNumber;
-            const [first, second] = tempSeat.split('#');
-            const seat = second; //the string after '#'
+            const [first, second] = tempSeat.split('#'); //remove string "Seat #" from the seat number
+            const seat = second; //seat number
 
             console.log("🔄 Sending update request for ID:", reservation.id);
 
@@ -153,7 +341,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            
             try {
                 const updateResponse = await fetch(`/update-reservation/${reservation.id}`, {
                     method: "PUT",
@@ -166,69 +353,56 @@ document.addEventListener("DOMContentLoaded", function () {
                     })
                 });
 
+                console.log("🔄 Server Response:", updateResponse);
+
                 if (updateResponse.ok) {
+                    // Close the overlay and update the table row with the new reservation data
                     closeEditOverlay();
-                    fetchUserReservations();
+                    updateTableRow(reservation.id, newDate, newTime);
+
+                    // Log a success message in the console
+                    console.log(`✅ Reservation with ID ${reservation.id} updated successfully!`);
                 } else {
                     const errorData = await updateResponse.json();
                     console.error("❌ Update Failed:", errorData);
-                    alert("Failed to update reservation: " + (errorData.message || "Seat is not available at this time"));
+                    
+                    if (updateResponse.status === 403) {
+                        alert("❌ You can only edit your own reservations.");
+                    } else if (updateResponse.status === 409) {
+                        alert("❌ Seat is already reserved at that time. Please choose a different time.");
+                    } else {
+                        alert("Failed to update reservation: " + (errorData.message || "Seat is not available at this time."));
+                    }
                 }
             } catch (error) {
                 console.error("⚠️ Error updating reservation:", error);
                 alert("Failed to update reservation due to a network error.");
             }
         };
-    }
 
-    function closeEditOverlay() {
-        document.querySelector(".edit-overlay").classList.remove("active");
-    }
+        // Cancel button functionality
+        const cancelButton = document.querySelector("#cancelButton");
+        const newCancelButton = cancelButton.cloneNode(true);
+        cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
 
-    document.querySelector("#cancelButton").addEventListener("click", closeEditOverlay);
+        newCancelButton.addEventListener("click", function() {
+            closeEditOverlay();
+        });
 
-    function generateTimeOptions() {
-        editTimeDropdown.innerHTML = ""; // Clear previous options
-    
-        for (let hour = 8; hour < 19; hour++) {
-            for (let minute of [0, 30]) {
-                // Format start time (12-hour)
-                const startHour = hour % 12 || 12;
-                const startMinute = String(minute).padStart(2, "0");
-                const startPeriod = hour >= 12 ? "PM" : "AM";
-                const startTime = `${String(hour).padStart(2, "0")}:${startMinute}`; // Keep 24h format for value
-    
-                // Calculate and format end time (12-hour)
-                let endHour = hour;
-                let endMinute = minute + 30;
-                if (endMinute >= 60) {
-                    endHour++;
-                    endMinute -= 60;
-                }
-                const displayEndHour = endHour % 12 || 12;
-                const endPeriod = endHour >= 12 ? "PM" : "AM";
-    
-                // Create time label in 12-hour format
-                const timeLabel = `${startHour}:${startMinute} ${startPeriod} - ${displayEndHour}:${String(endMinute).padStart(2, "0")} ${endPeriod}`;
-    
-                let option = document.createElement("option");
-                option.value = startTime; // Keep 24h format for value
-                option.textContent = timeLabel; // Show 12h format for display
-                editTimeDropdown.appendChild(option);
+        // Close the overlay when clicking outside of the overlay content
+        editOverlay.onclick = function(event) {
+            if (event.target === editOverlay) {
+                closeEditOverlay();
             }
-        }
+        };
     }
 
-    editDateInput.addEventListener("change", function () {
-        const today = new Date().toISOString().split("T")[0];
+    // Initialize the dashboard
+    async function initializeDashboard() {
+        await fetchCurrentUser(); // Get current user first
+        fetchUserReservations(); // Then fetch reservations
+    }
 
-        if (this.value < today) {
-            alert("🚫 You cannot select past dates.");
-            this.value = today;
-        } else {
-            generateTimeOptions();
-        }
-    });
-
-    fetchUserReservations();
+    // Start the dashboard
+    initializeDashboard();
 });
