@@ -71,6 +71,21 @@
                     <button class="reserveButton" onclick="window.location.assign('/reserve')">Reserve Now!</button>
                 </div>
             </div>
+
+        {{#if userData.account_type}}
+            <div class="labTechInfo">
+                <div class="labTechDetails">
+                    <h3>Lab Tech Information</h3>
+                    <p><strong>Role:</strong> {{userData.account_type}}</p>
+                    <p><strong>Email:</strong> {{userData.email}}</p>
+                    <div class="labTechAccessLevel">
+                        <p><strong>Access Level:</strong> Edit & Delete</p>
+                        <small>You can modify and permanently delete reservations</small>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+
         </div>
     </div>
 </div>
