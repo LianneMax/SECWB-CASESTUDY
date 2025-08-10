@@ -397,43 +397,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     })
                 });
 
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    console.log("Password changed successfully");
+                // Handle HTTP error status codes
+                if (!response.ok) {
+                    let errorMessage = "Unknown error occurred";
                     
-                    // Hide change password modal
-                    hideModal(changePasswordModal);
-                    
-                    // Clear password inputs
-                    clearPasswordInputs();
-                    
-                    // Show account deleted modal (reusing for success message)
-                    // Update the modal content for password change success
-                    const accountDeletedModalTitle = accountDeletedModal.querySelector('h2');
-                    const accountDeletedModalMessage = accountDeletedModal.querySelector('p');
-                    const goBackHomeButton = accountDeletedModal.querySelector('#goBackHomeBtn');
-                    
-                    if (accountDeletedModalTitle) {
-                        accountDeletedModalTitle.textContent = "Password Changed Successfully";
-                    }
-                    if (accountDeletedModalMessage) {
-                        accountDeletedModalMessage.innerHTML = 'Your password has been updated successfully!<br>You will be redirected to the home page.';
-                    }
-                    if (goBackHomeButton) {
-                        goBackHomeButton.textContent = "Go to Home Page";
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (jsonError) {
+                        errorMessage = response.statusText || `HTTP ${response.status}`;
                     }
                     
-                    showModal(accountDeletedModal);
+                    console.error("Password change failed:", errorMessage);
                     
-                } else {
-                    console.error("Password change failed:", data.message);
-                    
-                    // Check if it's an authentication error that should log out the user
-                    if (response.status === 401 || data.message?.toLowerCase().includes('invalid') || 
-                        data.message?.toLowerCase().includes('incorrect') || data.message?.toLowerCase().includes('wrong')) {
-                        
-                        alert("Invalid current password. For security reasons, you will be logged out.");
+                    // Check if it's an authentication error (wrong current password)
+                    if (response.status === 401 || response.status === 403 || 
+                        errorMessage.toLowerCase().includes('invalid') || 
+                        errorMessage.toLowerCase().includes('incorrect') || 
+                        errorMessage.toLowerCase().includes('wrong') ||
+                        errorMessage.toLowerCase().includes('current password')) {
                         
                         // Clear password inputs
                         clearPasswordInputs();
@@ -441,18 +423,84 @@ document.addEventListener("DOMContentLoaded", function () {
                         // Hide the modal
                         hideModal(changePasswordModal);
                         
-                        // Redirect to logout or home page after a brief delay
-                        setTimeout(() => {
-                            window.location.href = "/logout";
-                        }, 2000);
+                        // Show alert and logout
+                        alert("Current password is incorrect. You will be logged out for security reasons.");
+                        
+                        // Redirect to logout
+                        window.location.href = "/logout";
+                        return;
+                        
+                    } else if (response.status === 429 || 
+                              errorMessage.toLowerCase().includes('limit') || 
+                              errorMessage.toLowerCase().includes('once a day') ||
+                              errorMessage.toLowerCase().includes('daily')) {
+                        
+                        // Handle daily limit error
+                        alert("You can only change your password once per day. Please try again tomorrow.");
+                        clearPasswordInputs();
+                        return;
                         
                     } else {
-                        alert("Error changing password: " + (data.message || "Please try again."));
+                        // Other server errors
+                        alert("Error changing password: " + errorMessage);
+                        clearPasswordInputs();
+                        return;
                     }
                 }
+
+                // If we get here, response was OK, try to parse JSON
+                const data = await response.json();
+
+                // Check for success indicators
+                const isSuccess = data.success || 
+                                (data.message && (data.message.toLowerCase().includes('success') || 
+                                                data.message.toLowerCase().includes('changed') ||
+                                                data.message.toLowerCase().includes('updated')));
+
+                if (isSuccess) {
+                    console.log("Password changed successfully");
+                    
+                    // Clear password inputs
+                    clearPasswordInputs();
+                    
+                    // Hide change password modal
+                    hideModal(changePasswordModal);
+                    
+                    // Update the success modal content for password change
+                    const successModalTitle = successChangesModal.querySelector('h2');
+                    const successModalMessage = successChangesModal.querySelector('p');
+                    const goBackButton = successChangesModal.querySelector('#goBackProfileBtn');
+                    
+                    if (successModalTitle) {
+                        successModalTitle.textContent = "Password Changed Successfully";
+                    }
+                    if (successModalMessage) {
+                        successModalMessage.innerHTML = 'Your password has been updated successfully!<br>Please log in again with your new password.';
+                    }
+                    if (goBackButton) {
+                        goBackButton.textContent = "Login Again";
+                        
+                        // Update the button click handler to redirect to logout
+                        goBackButton.onclick = function() {
+                            window.location.href = "/logout";
+                        };
+                    }
+                    
+                    // Show success modal
+                    showModal(successChangesModal);
+                    
+                } else {
+                    // Server returned OK but indicates failure
+                    console.error("Password change failed:", data.message);
+                    alert("Error changing password: " + (data.message || "Please try again."));
+                    clearPasswordInputs();
+                }
+
             } catch (error) {
-                console.error("Error changing password:", error);
-                alert("A network error occurred. Please check your connection and try again.");
+                console.error("Network error changing password:", error);
+                // This is a true network error (connection failed, etc.)
+                alert("Unable to connect to the server. Please check your internet connection and try again.");
+                clearPasswordInputs();
             }
         });
     }
@@ -491,121 +539,116 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ========== DELETE ACCOUNT CONFIRMATION ==========
-    if (confirmDeleteBtn) {
-        confirmDeleteBtn.addEventListener("click", async function (event) {
-            event.preventDefault(); // Prevent default form submission
-            
-            const currentPasswordInput = document.getElementById("delete-current-password");
-            const currentPassword = currentPasswordInput ? currentPasswordInput.value : '';
-            
-            // Basic validation
-            if (!currentPassword) {
-                alert("Please enter your current password to delete your account.");
-                return;
-            }
-            
-            try {
-                const response = await fetch("/deleteaccount", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ currentPassword })
-                });
+// ========== DELETE ACCOUNT CONFIRMATION ==========
+if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener("click", async function (event) {
+        event.preventDefault(); // Prevent default form submission
+        
+        const currentPasswordInput = document.getElementById("delete-current-password");
+        const currentPassword = currentPasswordInput ? currentPasswordInput.value : '';
+        
+        // Basic validation
+        if (!currentPassword) {
+            alert("Please enter your current password to delete your account.");
+            return;
+        }
+        
+        try {
+            const response = await fetch("/deleteaccount", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ currentPassword })
+            });
 
-                // Check if we got a response
-                if (!response.ok) {
-                    // Handle HTTP error status codes
-                    let errorMessage = "Unknown error occurred";
-                    
-                    try {
-                        const errorData = await response.json();
-                        errorMessage = errorData.message || errorMessage;
-                    } catch (jsonError) {
-                        // If we can't parse JSON, use status text
-                        errorMessage = response.statusText || `HTTP ${response.status}`;
-                    }
-                    
-                    // Check if it's an authentication error (wrong password)
-                    if (response.status === 401 || response.status === 403 || 
-                        errorMessage.toLowerCase().includes('invalid') || 
-                        errorMessage.toLowerCase().includes('incorrect') || 
-                        errorMessage.toLowerCase().includes('wrong') ||
-                        errorMessage.toLowerCase().includes('password')) {
-                        
-                        console.log("Authentication failed - wrong password");
-                        
-                        // Clear the password input
-                        if (currentPasswordInput) currentPasswordInput.value = '';
-                        
-                        // Hide the modal first
-                        hideModal(deleteAccountModal);
-                        
-                        // Show alert with specific message and then logout
-                        alert("Password is wrong. Log in again to retry.");
-                        
-                        // Immediate redirect to logout which should go to index
-                        window.location.href = "/logout";
-                        return;
-                    } else {
-                        // For other HTTP errors, show the error message
-                        alert("Error deleting account: " + errorMessage);
-                        if (currentPasswordInput) currentPasswordInput.value = '';
-                        return;
-                    }
+            // Check if we got a response
+            if (!response.ok) {
+                // Handle HTTP error status codes
+                let errorMessage = "Unknown error occurred";
+                
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch (jsonError) {
+                    // If we can't parse JSON, use status text
+                    errorMessage = response.statusText || `HTTP ${response.status}`;
                 }
-
-                // If we get here, response was OK, try to parse JSON
-                const data = await response.json();
-
-                // Check if the server response indicates success based on the message content
-                const isSuccess = data.message && data.message.toLowerCase().includes('deleted successfully');
-
-                if (isSuccess) {
-                    console.log("Account deleted successfully");
+                
+                // Check if it's an authentication error (wrong password)
+                if (response.status === 400 || response.status === 401 || response.status === 403) {
+                    console.log("Authentication failed - wrong password");
                     
                     // Clear the password input
                     if (currentPasswordInput) currentPasswordInput.value = '';
                     
-                    // Hide delete account modal
-                    hideModal(deleteAccountModal);
-                    
-                    // Ensure the success modal has the correct content
-                    const accountDeletedModalTitle = accountDeletedModal.querySelector('h2');
-                    const accountDeletedModalMessage = accountDeletedModal.querySelector('p');
-                    const goBackHomeButton = accountDeletedModal.querySelector('#goBackHomeBtn');
-                    
-                    if (accountDeletedModalTitle) {
-                        accountDeletedModalTitle.textContent = "Account Successfully Deleted";
-                    }
-                    if (accountDeletedModalMessage) {
-                        accountDeletedModalMessage.innerHTML = 'Thank you for using <span style="color: #377684; font-weight: bold;">Labyrinth</span>!';
-                    }
-                    if (goBackHomeButton) {
-                        goBackHomeButton.textContent = "Go Back to Home Page";
-                    }
-                    
-                    // Show success modal
-                    showModal(accountDeletedModal);
-                    
+                    // Show specific error message for wrong password
+                    alert("Incorrect password. Please try again.");
+                    return; // Don't redirect, let user try again
                 } else {
-                    // Server returned OK but indicates failure in the message
-                    console.error("Account deletion failed:", data.message);
-                    alert("Error deleting account: " + (data.message || "Please try again."));
+                    // For other HTTP errors, show the error message
+                    alert("Error deleting account: " + errorMessage);
                     if (currentPasswordInput) currentPasswordInput.value = '';
+                    return;
                 }
+            }
 
-            } catch (error) {
-                console.error("Network error deleting account:", error);
+            // If we get here, response was OK, try to parse JSON
+            const data = await response.json();
+
+            // Check if the server response indicates success
+            const isSuccess = data.message && data.message.toLowerCase().includes('deleted successfully');
+
+            if (isSuccess) {
+                console.log("Account deleted successfully");
                 
-                // This is a true network error (connection failed, etc.)
-                alert("A network error occurred. Please check your connection and try again.");
+                // Clear the password input
+                if (currentPasswordInput) currentPasswordInput.value = '';
                 
-                // Clear the password field for security
+                // Hide delete account modal
+                hideModal(deleteAccountModal);
+                
+                // Ensure the success modal has the correct content
+                const accountDeletedModalTitle = accountDeletedModal.querySelector('h2');
+                const accountDeletedModalMessage = accountDeletedModal.querySelector('p');
+                const goBackHomeButton = accountDeletedModal.querySelector('#goBackHomeBtn');
+                
+                if (accountDeletedModalTitle) {
+                    accountDeletedModalTitle.textContent = "Account Successfully Deleted";
+                }
+                if (accountDeletedModalMessage) {
+                    accountDeletedModalMessage.innerHTML = 'Thank you for using <span style="color: #377684; font-weight: bold;">Labyrinth</span>!';
+                }
+                if (goBackHomeButton) {
+                    goBackHomeButton.textContent = "Go Back to Home Page";
+                }
+                
+                // Show success modal
+                showModal(accountDeletedModal);
+                
+            } else {
+                // Server returned OK but indicates failure in the message
+                console.error("Account deletion failed:", data.message);
+                
+                // Check if the message indicates wrong password
+                if (data.message && data.message.toLowerCase().includes('incorrect password')) {
+                    alert("Incorrect password. Please try again.");
+                } else {
+                    alert("Error deleting account: " + (data.message || "Please try again."));
+                }
+                
                 if (currentPasswordInput) currentPasswordInput.value = '';
             }
-        });
-    }
 
+        } catch (error) {
+            console.error("Network error deleting account:", error);
+            
+            // This is a true network error (connection failed, etc.)
+            alert("A network error occurred. Please check your connection and try again.");
+            
+            // Clear the password field for security
+            if (currentPasswordInput) currentPasswordInput.value = '';
+        }
+    });
+}
     // ========== CLOSE MODALS ==========
     if (closeDeleteAccount) {
         closeDeleteAccount.addEventListener("click", function () {
@@ -654,17 +697,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (closeSuccessChangesBtn) {
         closeSuccessChangesBtn.addEventListener("click", function () {
-            hideModal(successChangesModal);
-            // Optionally reload the page to show updated data
-            window.location.reload();
+            // Check if this is being used for password change success
+            const modalTitle = successChangesModal.querySelector('h2');
+            if (modalTitle && modalTitle.textContent === "Password Changed Successfully") {
+                // Password was changed, redirect to logout
+                window.location.href = "/logout";
+            } else {
+                // For profile changes, just hide modal and reload
+                hideModal(successChangesModal);
+                window.location.reload();
+            }
         });
     }
 
     if (goBackProfileBtn) {
         goBackProfileBtn.addEventListener("click", function () {
-            hideModal(successChangesModal);
-            // Optionally reload the page to show updated data
-            window.location.reload();
+            // Check if this is being used for password change success
+            const modalTitle = successChangesModal.querySelector('h2');
+            if (modalTitle && modalTitle.textContent === "Password Changed Successfully") {
+                // Password was changed, redirect to logout
+                window.location.href = "/logout";
+            } else {
+                // For profile changes, just hide modal and reload
+                hideModal(successChangesModal);
+                window.location.reload();
+            }
         });
     }
 

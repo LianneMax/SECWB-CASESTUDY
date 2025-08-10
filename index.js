@@ -969,7 +969,10 @@ app.post('/deleteaccount', isAuthenticated, async (req, res) => {
 
         // Re-authenticate
         if (user.password !== sha256(currentPassword)) {
-            return res.status(400).send("<script>alert('Incorrect password inputted!'); window.location='/profile';</script>");
+            return res.status(400).json({ 
+                success: false, 
+                message: "Incorrect password inputted!" 
+            });
         }
 
         // Delete all future reservations associated with the user
