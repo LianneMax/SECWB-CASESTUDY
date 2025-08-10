@@ -370,7 +370,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const newPassword = newPasswordInput ? newPasswordInput.value : '';
             const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : '';
             
-            // Basic validation
+            // Frontend validation
             if (!currentPassword || !newPassword || !confirmPassword) {
                 alert("Please fill in all password fields.");
                 return;
@@ -378,13 +378,23 @@ document.addEventListener("DOMContentLoaded", function () {
             
             if (newPassword !== confirmPassword) {
                 alert("New password and confirmation password do not match.");
+                // Clear the new password fields but keep current password
+                if (newPasswordInput) newPasswordInput.value = '';
+                if (confirmPasswordInput) confirmPasswordInput.value = '';
                 return;
             }
             
             if (newPassword.length < 6) {
                 alert("New password must be at least 6 characters long.");
+                // Clear the new password fields but keep current password
+                if (newPasswordInput) newPasswordInput.value = '';
+                if (confirmPasswordInput) confirmPasswordInput.value = '';
                 return;
             }
+
+            // Disable the submit button to prevent double submission
+            submitPasswordBtn.disabled = true;
+            submitPasswordBtn.textContent = "Changing Password...";
 
             try {
                 const response = await fetch("/changepassword", {
@@ -397,67 +407,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     })
                 });
 
-                // Handle HTTP error status codes
-                if (!response.ok) {
-                    let errorMessage = "Unknown error occurred";
-                    
-                    try {
-                        const errorData = await response.json();
-                        errorMessage = errorData.message || errorMessage;
-                    } catch (jsonError) {
-                        errorMessage = response.statusText || `HTTP ${response.status}`;
-                    }
-                    
-                    console.error("Password change failed:", errorMessage);
-                    
-                    // Check if it's an authentication error (wrong current password)
-                    if (response.status === 401 || response.status === 403 || 
-                        errorMessage.toLowerCase().includes('invalid') || 
-                        errorMessage.toLowerCase().includes('incorrect') || 
-                        errorMessage.toLowerCase().includes('wrong') ||
-                        errorMessage.toLowerCase().includes('current password')) {
-                        
-                        // Clear password inputs
-                        clearPasswordInputs();
-                        
-                        // Hide the modal
-                        hideModal(changePasswordModal);
-                        
-                        // Show alert and logout
-                        alert("Current password is incorrect. You will be logged out for security reasons.");
-                        
-                        // Redirect to logout
-                        window.location.href = "/logout";
-                        return;
-                        
-                    } else if (response.status === 429 || 
-                              errorMessage.toLowerCase().includes('limit') || 
-                              errorMessage.toLowerCase().includes('once a day') ||
-                              errorMessage.toLowerCase().includes('daily')) {
-                        
-                        // Handle daily limit error
-                        alert("You can only change your password once per day. Please try again tomorrow.");
-                        clearPasswordInputs();
-                        return;
-                        
-                    } else {
-                        // Other server errors
-                        alert("Error changing password: " + errorMessage);
-                        clearPasswordInputs();
-                        return;
-                    }
+                // Always try to parse the response as JSON first
+                let responseData = null;
+                let isResponseJson = false;
+                
+                try {
+                    responseData = await response.json();
+                    isResponseJson = true;
+                } catch (jsonError) {
+                    console.error("Failed to parse JSON response:", jsonError);
+                    // If JSON parsing fails, we'll handle it as a non-JSON error
                 }
 
-                // If we get here, response was OK, try to parse JSON
-                const data = await response.json();
+                // Re-enable submit button
+                submitPasswordBtn.disabled = false;
+                submitPasswordBtn.textContent = "Change Password";
 
-                // Check for success indicators
-                const isSuccess = data.success || 
-                                (data.message && (data.message.toLowerCase().includes('success') || 
-                                                data.message.toLowerCase().includes('changed') ||
-                                                data.message.toLowerCase().includes('updated')));
-
-                if (isSuccess) {
+                // Handle successful responses (status 200)
+                if (response.ok && isResponseJson && responseData && responseData.success) {
                     console.log("Password changed successfully");
                     
                     // Clear password inputs
@@ -490,16 +457,75 @@ document.addEventListener("DOMContentLoaded", function () {
                     showModal(successChangesModal);
                     
                 } else {
-                    // Server returned OK but indicates failure
-                    console.error("Password change failed:", data.message);
-                    alert("Error changing password: " + (data.message || "Please try again."));
-                    clearPasswordInputs();
+                    // Handle error responses
+                    let errorMessage = "An unknown error occurred.";
+                    
+                    if (isResponseJson && responseData && responseData.message) {
+                        errorMessage = responseData.message;
+                    } else if (!isResponseJson) {
+                        // Handle non-JSON responses
+                        if (response.status === 400) {
+                            errorMessage = "Bad request. Please check your input.";
+                        } else if (response.status === 401) {
+                            errorMessage = "Current password is incorrect.";
+                        } else if (response.status === 429) {
+                            errorMessage = "You can only change your password once every 24 hours.";
+                        } else if (response.status === 500) {
+                            errorMessage = "Internal server error. Please try again later.";
+                        } else {
+                            errorMessage = `Server error (${response.status}). Please try again.`;
+                        }
+                    }
+
+                    // Handle different error types with appropriate field clearing
+                    if (response.status === 401 || errorMessage.toLowerCase().includes('incorrect password') || errorMessage.toLowerCase().includes('current password')) {
+                        // Wrong current password - clear only current password field
+                        if (currentPasswordInput) currentPasswordInput.value = '';
+                        alert("Current password is incorrect. Please try again.");
+                        
+                    } else if (response.status === 429 || errorMessage.includes('24 hours') || errorMessage.includes('once every') || errorMessage.includes('hour')) {
+                        // Rate limited - show the full message and clear all fields
+                        alert(errorMessage);
+                        clearPasswordInputs();
+                        
+                    } else if (response.status === 400) {
+                        // Validation errors - handle different types
+                        if (errorMessage.toLowerCase().includes('password') && errorMessage.toLowerCase().includes('match')) {
+                            // Password mismatch - clear new password fields
+                            if (newPasswordInput) newPasswordInput.value = '';
+                            if (confirmPasswordInput) confirmPasswordInput.value = '';
+                            alert("New password and confirmation password do not match.");
+                        } else if (errorMessage.toLowerCase().includes('same') && errorMessage.toLowerCase().includes('old')) {
+                            // Same as old password - clear new password fields
+                            if (newPasswordInput) newPasswordInput.value = '';
+                            if (confirmPasswordInput) confirmPasswordInput.value = '';
+                            alert(errorMessage);
+                        } else if (errorMessage.toLowerCase().includes('8 characters') || errorMessage.toLowerCase().includes('complexity')) {
+                            // Password complexity issue - clear new password fields
+                            if (newPasswordInput) newPasswordInput.value = '';
+                            if (confirmPasswordInput) confirmPasswordInput.value = '';
+                            alert(errorMessage);
+                        } else {
+                            // Other 400 errors - show message and clear all
+                            alert(errorMessage);
+                            clearPasswordInputs();
+                        }
+                        
+                    } else {
+                        // Other server errors - show message and clear all fields
+                        console.error("Password change error:", errorMessage);
+                        alert(errorMessage);
+                        clearPasswordInputs();
+                    }
                 }
 
             } catch (error) {
+                // Re-enable submit button
+                submitPasswordBtn.disabled = false;
+                submitPasswordBtn.textContent = "Change Password";
+                
                 console.error("Network error changing password:", error);
-                // This is a true network error (connection failed, etc.)
-                alert("Unable to connect to the server. Please check your internet connection and try again.");
+                alert("A network error occurred. Please check your connection and try again.");
                 clearPasswordInputs();
             }
         });
@@ -539,116 +565,117 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-// ========== DELETE ACCOUNT CONFIRMATION ==========
-if (confirmDeleteBtn) {
-    confirmDeleteBtn.addEventListener("click", async function (event) {
-        event.preventDefault(); // Prevent default form submission
-        
-        const currentPasswordInput = document.getElementById("delete-current-password");
-        const currentPassword = currentPasswordInput ? currentPasswordInput.value : '';
-        
-        // Basic validation
-        if (!currentPassword) {
-            alert("Please enter your current password to delete your account.");
-            return;
-        }
-        
-        try {
-            const response = await fetch("/deleteaccount", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ currentPassword })
-            });
+    // ========== DELETE ACCOUNT CONFIRMATION ==========
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener("click", async function (event) {
+            event.preventDefault(); // Prevent default form submission
+            
+            const currentPasswordInput = document.getElementById("delete-current-password");
+            const currentPassword = currentPasswordInput ? currentPasswordInput.value : '';
+            
+            // Basic validation
+            if (!currentPassword) {
+                alert("Please enter your current password to delete your account.");
+                return;
+            }
+            
+            try {
+                const response = await fetch("/deleteaccount", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ currentPassword })
+                });
 
-            // Check if we got a response
-            if (!response.ok) {
-                // Handle HTTP error status codes
-                let errorMessage = "Unknown error occurred";
-                
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorMessage;
-                } catch (jsonError) {
-                    // If we can't parse JSON, use status text
-                    errorMessage = response.statusText || `HTTP ${response.status}`;
+                // Check if we got a response
+                if (!response.ok) {
+                    // Handle HTTP error status codes
+                    let errorMessage = "Unknown error occurred";
+                    
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (jsonError) {
+                        // If we can't parse JSON, use status text
+                        errorMessage = response.statusText || `HTTP ${response.status}`;
+                    }
+                    
+                    // Check if it's an authentication error (wrong password)
+                    if (response.status === 400 || response.status === 401 || response.status === 403) {
+                        console.log("Authentication failed - wrong password");
+                        
+                        // Clear the password input
+                        if (currentPasswordInput) currentPasswordInput.value = '';
+                        
+                        // Show specific error message for wrong password
+                        alert("Incorrect password. Please try again.");
+                        return; // Don't redirect, let user try again
+                    } else {
+                        // For other HTTP errors, show the error message
+                        alert("Error deleting account: " + errorMessage);
+                        if (currentPasswordInput) currentPasswordInput.value = '';
+                        return;
+                    }
                 }
-                
-                // Check if it's an authentication error (wrong password)
-                if (response.status === 400 || response.status === 401 || response.status === 403) {
-                    console.log("Authentication failed - wrong password");
+
+                // If we get here, response was OK, try to parse JSON
+                const data = await response.json();
+
+                // Check if the server response indicates success
+                const isSuccess = data.message && data.message.toLowerCase().includes('deleted successfully');
+
+                if (isSuccess) {
+                    console.log("Account deleted successfully");
                     
                     // Clear the password input
                     if (currentPasswordInput) currentPasswordInput.value = '';
                     
-                    // Show specific error message for wrong password
-                    alert("Incorrect password. Please try again.");
-                    return; // Don't redirect, let user try again
+                    // Hide delete account modal
+                    hideModal(deleteAccountModal);
+                    
+                    // Ensure the success modal has the correct content
+                    const accountDeletedModalTitle = accountDeletedModal.querySelector('h2');
+                    const accountDeletedModalMessage = accountDeletedModal.querySelector('p');
+                    const goBackHomeButton = accountDeletedModal.querySelector('#goBackHomeBtn');
+                    
+                    if (accountDeletedModalTitle) {
+                        accountDeletedModalTitle.textContent = "Account Successfully Deleted";
+                    }
+                    if (accountDeletedModalMessage) {
+                        accountDeletedModalMessage.innerHTML = 'Thank you for using <span style="color: #377684; font-weight: bold;">Labyrinth</span>!';
+                    }
+                    if (goBackHomeButton) {
+                        goBackHomeButton.textContent = "Go Back to Home Page";
+                    }
+                    
+                    // Show success modal
+                    showModal(accountDeletedModal);
+                    
                 } else {
-                    // For other HTTP errors, show the error message
-                    alert("Error deleting account: " + errorMessage);
+                    // Server returned OK but indicates failure in the message
+                    console.error("Account deletion failed:", data.message);
+                    
+                    // Check if the message indicates wrong password
+                    if (data.message && data.message.toLowerCase().includes('incorrect password')) {
+                        alert("Incorrect password. Please try again.");
+                    } else {
+                        alert("Error deleting account: " + (data.message || "Please try again."));
+                    }
+                    
                     if (currentPasswordInput) currentPasswordInput.value = '';
-                    return;
                 }
-            }
 
-            // If we get here, response was OK, try to parse JSON
-            const data = await response.json();
-
-            // Check if the server response indicates success
-            const isSuccess = data.message && data.message.toLowerCase().includes('deleted successfully');
-
-            if (isSuccess) {
-                console.log("Account deleted successfully");
+            } catch (error) {
+                console.error("Network error deleting account:", error);
                 
-                // Clear the password input
-                if (currentPasswordInput) currentPasswordInput.value = '';
+                // This is a true network error (connection failed, etc.)
+                alert("A network error occurred. Please check your connection and try again.");
                 
-                // Hide delete account modal
-                hideModal(deleteAccountModal);
-                
-                // Ensure the success modal has the correct content
-                const accountDeletedModalTitle = accountDeletedModal.querySelector('h2');
-                const accountDeletedModalMessage = accountDeletedModal.querySelector('p');
-                const goBackHomeButton = accountDeletedModal.querySelector('#goBackHomeBtn');
-                
-                if (accountDeletedModalTitle) {
-                    accountDeletedModalTitle.textContent = "Account Successfully Deleted";
-                }
-                if (accountDeletedModalMessage) {
-                    accountDeletedModalMessage.innerHTML = 'Thank you for using <span style="color: #377684; font-weight: bold;">Labyrinth</span>!';
-                }
-                if (goBackHomeButton) {
-                    goBackHomeButton.textContent = "Go Back to Home Page";
-                }
-                
-                // Show success modal
-                showModal(accountDeletedModal);
-                
-            } else {
-                // Server returned OK but indicates failure in the message
-                console.error("Account deletion failed:", data.message);
-                
-                // Check if the message indicates wrong password
-                if (data.message && data.message.toLowerCase().includes('incorrect password')) {
-                    alert("Incorrect password. Please try again.");
-                } else {
-                    alert("Error deleting account: " + (data.message || "Please try again."));
-                }
-                
+                // Clear the password field for security
                 if (currentPasswordInput) currentPasswordInput.value = '';
             }
-
-        } catch (error) {
-            console.error("Network error deleting account:", error);
-            
-            // This is a true network error (connection failed, etc.)
-            alert("A network error occurred. Please check your connection and try again.");
-            
-            // Clear the password field for security
-            if (currentPasswordInput) currentPasswordInput.value = '';
-        }
-    });
-}
+        });
+    }
+    
     // ========== CLOSE MODALS ==========
     if (closeDeleteAccount) {
         closeDeleteAccount.addEventListener("click", function () {

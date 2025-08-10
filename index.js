@@ -897,19 +897,46 @@ app.post('/submit-profile-details', isAuthenticated, async (req, res) => {
 });
 
 // Change password POST Route
+// Change password POST Route - Improved version
 app.post('/changepassword', isAuthenticated, async (req, res) => {
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
         const user_id = req.session.user._id;
 
-        const user = await User.findById(user_id);
-
-        // Re-authenticate
-        if (user.password !== sha256(currentPassword)) {
-            return res.status(400).send("<script>alert('Current password is incorrect!'); window.location='/profile';</script>");
+        // Validation: Check if all fields are provided
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Please fill in all password fields."
+            });
         }
 
-        // Trim and check complexity
+        // Validation: Check if new passwords match
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "New password and confirmation password do not match."
+            });
+        }
+
+        const user = await User.findById(user_id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found."
+            });
+        }
+
+        // Re-authenticate: Verify current password
+        if (user.password !== sha256(currentPassword)) {
+            return res.status(401).json({
+                success: false,
+                message: "Current password is incorrect."
+            });
+        }
+
+        // Trim and check complexity of new password
         const trimmedPassword = newPassword.trim();
         if (!isPasswordComplex(trimmedPassword)) {
             return res.status(400).json({
@@ -918,43 +945,61 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
             });
         }
 
-        // Check if passwords match
-        if (newPassword !== confirmPassword) {
-            return res.status(400).send("<script>alert('Passwords do not match!'); window.location='/profile';</script>");
-        }
-
         // Prevent password re-use
         const hashedPassword = sha256(trimmedPassword);
         if (user.password === hashedPassword) {
-            return res.status(400).send("<script>alert('New password cannot be the same as the old password!'); window.location='/profile';</script>");
+            return res.status(400).json({
+                success: false,
+                message: "New password cannot be the same as the current password."
+            });
         }
 
-        // Enforce password age (1 day)
+        // Enforce password age (1 day = 24 hours)
         const now = new Date();
         const lastChanged = user.passwordLastChanged || user.createdAt || user._id.getTimestamp();
-        const oneDay = 24 * 60 * 60 * 1000;
+        const oneDay = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
         if (now - lastChanged < oneDay) {
-            return res.status(400).send("<script>alert('You can only change your password once every 24 hours.'); window.location='/profile';</script>");
+            const nextAllowedChange = new Date(lastChanged.getTime() + oneDay);
+            const hoursRemaining = Math.ceil((nextAllowedChange - now) / (1000 * 60 * 60));
+            
+            return res.status(429).json({
+                success: false,
+                message: `You can only change your password once every 24 hours. Please wait ${hoursRemaining} more hour(s).`
+            });
         }
 
         // Update password and passwordLastChanged
-        await User.findByIdAndUpdate(user_id, { password: hashedPassword, passwordLastChanged: now });
-
-        console.log(`✅ Password updated for user: ${req.session.user.email}`);
-
-        // Destroy session to log user out
-        req.session.destroy((err) => {
-            if (err) {
-                console.error("⚠️ Error logging out after password change:", err);
-                return res.status(500).send("<script>alert('Error logging out. Please try again.'); window.location='/profile';</script>");
-            }
-            res.clearCookie("sessionId");
-            res.clearCookie("rememberMe");
+        await User.findByIdAndUpdate(user_id, { 
+            password: hashedPassword, 
+            passwordLastChanged: now 
         });
+
+        console.log(`✅ Password updated successfully for user: ${req.session.user.email}`);
+
+        // Return success response
+        res.status(200).json({
+            success: true,
+            message: "Password updated successfully. You will be logged out for security reasons."
+        });
+
+        // Log out the user after successful password change
+        // We do this after sending the response to avoid response timing issues
+        setTimeout(() => {
+            req.session.destroy((err) => {
+                if (err) {
+                    console.error("⚠️ Error logging out after password change:", err);
+                }
+                console.log(`🔐 User ${req.session?.user?.email || 'unknown'} logged out after password change`);
+            });
+        }, 100);
 
     } catch (err) {
         console.error("⚠️ Error updating password:", err);
-        res.status(500).send("<script>alert('Internal server error'); window.location='/profile';</script>");
+        res.status(500).json({
+            success: false,
+            message: "An internal error occurred. Please try again later."
+        });
     }
 });
 
