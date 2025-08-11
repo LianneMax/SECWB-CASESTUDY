@@ -411,6 +411,21 @@ function sha256(password) {
     return hash.digest('hex')
 }
 
+//creating Logs
+async function createLog({ action, user, room = null, seat = null, datetime = null, details = ''}){
+    const logEntry = new Logs({
+        timestamp: new Date(),
+        action,
+        user,
+        room,
+        seat,
+        datetime,
+        details
+    });
+
+    await logEntry.save();
+}
+
 // Route to INDEX.HTML
 // localhost:3000/
 app.get('/', function(req,res){
@@ -629,17 +644,32 @@ app.post('/verify-email', async (req, res) => {
         const securityQuestion = await SecurityQuestion.findOne({ email });
 
         if (!securityQuestion) {
+            await createLog({
+                action: 'verify-email-failed',
+                user: email || 'unknown',
+                details: 'Email not found during verification'
+            });
+
             return res.status(404).json({ 
                 success: false, 
                 message: "Email not found" 
             });
         }
-
+        await createLog({
+            action: 'verify-email-success',
+            user: email,
+            details: 'Security question sent for email verification'
+        });
         res.json({ 
             success: true, 
             question: securityQuestion.security_question 
         });
     } catch (error) {
+        await createLog({
+            action: 'verify-email-failed',
+            user: email,
+            details: 'Server Error'
+        });
         console.error('Error verifying email:', error);
         res.status(500).json({ success: false, message: "Server error" });
     }
@@ -742,12 +772,25 @@ app.post("/login", express.urlencoded({ extended: true }), async (req, res) => {
         const existingUser = await User.findOne({ email: email });
 
         if (!existingUser) {
+            // No such user exists.
+            await createLog({
+                action: 'no-user-login',
+                user: email || 'unknown',
+                details: 'No such user exists.'
+            });
             return res.status(401).json({ success: false, message: "User not found." });
         }
 
         // Check if account is locked
         if (existingUser.lockUntil && existingUser.lockUntil > Date.now()) {
             const unlockDate = new Date(existingUser.lockUntil);
+           
+            await createLog({
+                action: 'locked-account',
+                user: email || 'unknown',
+                details: 'Account Locked after numerous failed attempts.'
+            });
+
             return res.status(403).json({
                 success: false,
                 message: `Account locked. Try again at ${unlockDate.toLocaleString()}.`,
@@ -774,7 +817,12 @@ app.post("/login", express.urlencoded({ extended: true }), async (req, res) => {
                     { $inc: { loginAttempts: 1 } }
                 );
             }
-
+            // Incorrect Password Log.
+            await createLog({
+                action: 'login-fail',
+                user: email || 'unknown',
+                details: 'User had the incorrect password.'
+            });
             return res.status(401).json({ success: false, message: "Invalid password." });
         }
 
@@ -803,7 +851,12 @@ app.post("/login", express.urlencoded({ extended: true }), async (req, res) => {
         } else {
             return res.status(401).json({ success: false, message: "Invalid account type." });
         }
-
+        // Successful Log-in Log.
+            await createLog({
+                action: 'login-success',
+                user: email || 'unknown',
+                details: 'User was able to log-in.'
+            });
         // Send last login info to frontend
         return res.json({
             success: true,
