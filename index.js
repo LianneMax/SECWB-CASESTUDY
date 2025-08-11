@@ -17,6 +17,7 @@ const Building = require("./database/models/Building.js")
 const Room = require("./database/models/Room")
 const Reservation = require("./database/models/Reservation")
 const SecurityQuestion = require('./database/models/SecurityQuestion');
+const Logs = require('./database/models/Logs');
 const SECURITY_QUESTIONS = [
     "What was the name of your first stuffed animal?",
     "What is the name of the street you grew up on?",
@@ -426,7 +427,7 @@ app.get('/about-us', function(req,res){
 // localhost:3000/logs
 // Replace your existing logs route with this debugging version:
 
-app.get('/logs', (req, res) => {
+app.get('/logs', async (req, res) => {
     console.log('🔍 LOGS ROUTE HIT - Starting debugging...');
     console.log('📋 Session user:', req.session.user);
     console.log('🔑 User account type:', req.session.user?.account_type);
@@ -445,6 +446,10 @@ app.get('/logs', (req, res) => {
     
     console.log('✅ All checks passed - rendering logs template');
     console.log('📁 Looking for template: logs.hbs');
+
+     const logs = await Logs.find();
+    console.log("All logs from DB:", logs);
+
     console.log('👤 Passing userData:', {
         email: req.session.user.email,
         account_type: req.session.user.account_type,
@@ -452,7 +457,8 @@ app.get('/logs', (req, res) => {
     });
     
     try {
-        res.render('logs', { userData: req.session.user });
+        res.render('logs', { userData: req.session.user, logs
+        });
         console.log('✅ Template rendered successfully');
     } catch (error) {
         console.error('❌ Error rendering template:', error);
