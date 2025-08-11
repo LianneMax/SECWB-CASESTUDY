@@ -376,16 +376,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
             
+            // Check if new password is same as current password first
+            if (newPassword === currentPassword) {
+                alert("New password cannot be the same as the current password.");
+                if (newPasswordInput) newPasswordInput.value = '';
+                if (confirmPasswordInput) confirmPasswordInput.value = '';
+                return;
+            }
+
             if (newPassword !== confirmPassword) {
                 alert("New password and confirmation password do not match.");
-                // Clear the new password fields but keep current password
                 if (newPasswordInput) newPasswordInput.value = '';
                 if (confirmPasswordInput) confirmPasswordInput.value = '';
                 return;
             }
             
-            if (newPassword.length < 6) {
-                alert("New password must be at least 6 characters long.");
+            if (newPassword.length < 8) {
+                alert("New password must be at least 8 characters long.");
                 // Clear the new password fields but keep current password
                 if (newPasswordInput) newPasswordInput.value = '';
                 if (confirmPasswordInput) confirmPasswordInput.value = '';
