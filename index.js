@@ -510,21 +510,46 @@ app.post('/register', async (req, res) => {
 
         // Validate field lengths
         if (first_name.length > 25) {
+            await createLog({
+            action: 'error-registration',
+            user: email,
+            details: 'First name must be at most 25 characters.'
+        });
             return res.status(400).json({ success: false, message: "First name must be at most 25 characters." });
         }
         if (last_name.length > 25) {
+            await createLog({
+            action: 'error-registration',
+            user: email,
+            details: 'Last name must be at most 25 characters.'
+        });
             return res.status(400).json({ success: false, message: "Last name must be at most 25 characters." });
         }
         if (security_answer.length > 50) {
+            await createLog({
+            action: 'error-registration',
+            user: email,
+            details: 'Security answer must be at most 50 characters.'
+        });
             return res.status(400).json({ success: false, message: "Security answer must be at most 50 characters." });
         }
         const emailLocalPart = email.split('@')[0];
         if (emailLocalPart.length > 64) {
+            await createLog({
+            action: 'error-registration',
+            user: email,
+            details: 'Email local part must be at most 64 characters."'
+        });
             return res.status(400).json({ success: false, message: "Email local part must be at most 64 characters." });
         }
 
         // Check if email contains @dlsu.edu.ph
         if (!email.endsWith("@dlsu.edu.ph")) {
+            await createLog({
+            action: 'error-email-domain',
+            user: email,
+            details: 'Email must end with @dlsu.edu.ph' 
+        });
             return res.status(400).json({
                 success: false,
                 message: "Email must be a valid DLSU email ending with @dlsu.edu.ph"
@@ -536,6 +561,11 @@ app.post('/register', async (req, res) => {
 
         // Enforce password complexity
         if (!isPasswordComplex(trimmedPassword)) {
+            await createLog({
+            action: 'error-password-complexity',
+            user: email,
+            details: 'Password did not meet requirements.'
+        });
             return res.status(400).json({
                 success: false,
                 message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
@@ -692,6 +722,11 @@ app.post('/verify-security-answer', async (req, res) => {
             req.session.resetPasswordEmail = email;
             res.json({ success: true });
         } else {
+            await createLog({
+            action: 'error-security-question',
+            user: email,
+            details: 'Incorrect Security Question'
+        });
             res.json({ 
                 success: false, 
                 message: "Incorrect answer" 
@@ -711,6 +746,11 @@ app.post('/reset-password', async (req, res) => {
 
         // Enforce password complexity
         if (!isPasswordComplex(trimmedPassword)) {
+            await createLog({
+            action: 'error-password-reset',
+            user: email,
+            details: 'Password did not meet requirements.'
+        });
             return res.status(400).json({
                 success: false,
                 message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
@@ -728,6 +768,11 @@ app.post('/reset-password', async (req, res) => {
         // Prevent password re-use
         const hashedPassword = sha256(trimmedPassword);
         if (user && user.password === hashedPassword) {
+            await createLog({
+            action: 'error-password-reset',
+            user: email,
+            details: 'Password was the same as before.'
+        });
             return res.status(400).json({
                 success: false,
                 message: "New password cannot be the same as the old password."
@@ -1111,6 +1156,7 @@ app.post('/deleteaccount', isAuthenticated, async (req, res) => {
 
         // Re-authenticate
         if (user.password !== sha256(currentPassword)) {
+            
             return res.status(400).json({ 
                 success: false, 
                 message: "Incorrect password inputted!" 
