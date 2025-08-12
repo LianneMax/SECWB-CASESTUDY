@@ -79,7 +79,14 @@ const isLabTech = (req, res, next) => {
     } else {
         // Fail securely - serve 403 error page
         console.log(`🚫 Lab Tech access denied for user: ${req.session.user?.email || 'Anonymous'} to ${req.originalUrl}`);
-        res.status(403).sendFile(path.join(__dirname, '403.html'))
+        
+        res.status(403);
+        res.set({
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        });
+        res.sendFile(path.join(__dirname, '403.html'))
     }
 }
 
@@ -94,7 +101,14 @@ const isStaff = (req, res, next) => {
         // Fail securely - serve 403 error page
         console.log(`🚫 Staff access denied for user: ${req.session.user?.email || 'Anonymous'} to ${req.originalUrl}`);
         console.log(`🔍 Session data:`, req.session.user);
-        res.status(403).sendFile(path.join(__dirname, '403.html'))
+        
+        res.status(403);
+        res.set({
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        });
+        res.sendFile(path.join(__dirname, '403.html'))
     }
 }
 
@@ -165,7 +179,15 @@ const isOwnerOrAuthorized = async (req, res, next) => {
 
 // Route to serve 403 error page directly
 app.get('/403', (req, res) => {
-    res.status(403).sendFile(path.join(__dirname, '403.html'));
+    console.log(`🚫 403 page accessed - User: ${req.session.user?.email || 'Anonymous'}, Referrer: ${req.get('Referrer') || 'Direct'}`);
+    
+    res.status(403);
+    res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    });
+    res.sendFile(path.join(__dirname, '403.html'));
 });
 
 // Get Reservations Seat Availability
@@ -1496,4 +1518,27 @@ app.listen(PORT, async function() {
         console.log('Connection to MongoDB failed: ');
         console.error(err);
     }
+});
+
+// Force login route - clears session and redirects to login
+app.get('/force-login', (req, res) => {
+    console.log('🔄 Force login redirect triggered');
+    
+    if (req.session) {
+        req.session.destroy((err) => {
+            if (err) console.error('Session destruction error:', err);
+        });
+    }
+    
+    res.clearCookie('sessionId');
+    res.clearCookie('rememberMe');
+    res.clearCookie('connect.sid'); // Default session cookie name
+    
+    res.redirect('/login');
+});
+
+// Force home route
+app.get('/force-home', (req, res) => {
+    console.log('🏠 Force home redirect triggered');
+    res.redirect('/');
 });
