@@ -68,6 +68,15 @@ document.addEventListener("DOMContentLoaded", function () {
     let lockoutTimer = null;
     let remainingTime = timeoutDuration / 1000; // remaining time in seconds
 
+    // Function to clear password input
+    function clearPasswordInput() {
+        const passwordInput = document.getElementById("password");
+        if (passwordInput) {
+            passwordInput.value = "";
+            passwordInput.focus(); // Optional: focus back to the password field
+        }
+    }
+
     // Handle login form submission
     loginForm?.addEventListener("submit", async function (event) {
         event.preventDefault();
@@ -78,6 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!email || !password) {
             incorrectPasswordModal.open();
+            clearPasswordInput(); // Clear password on empty fields
             return;
         }
 
@@ -96,6 +106,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.location.href = data.redirect;
             } else {
                 console.warn("⚠️ Login failed:", data.message);
+
+                // Clear password input on failed login
+                clearPasswordInput();
 
                 // Check if account is locked
                 if (data.message && data.message.includes("Account locked")) {
@@ -129,6 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         } catch (error) {
             console.error("❌ Error:", error);
+            clearPasswordInput(); // Clear password on error
             incorrectPasswordModal.open();
         }
     });
