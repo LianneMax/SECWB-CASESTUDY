@@ -30,6 +30,9 @@ const SECURITY_QUESTIONS = [
     "What is the name of your favorite teacher?",
     "What is the title of the first movie you saw in a theater?"
 ];
+
+
+
 const path = require('path')
 
 const app = express()
@@ -433,6 +436,8 @@ function sha256(password) {
     return hash.digest('hex')
 }
 
+
+
 //creating Logs
 async function createLog({ action, user, room = null, seat = null, datetime = null, details = ''}){
     const logEntry = new Logs({
@@ -447,7 +452,6 @@ async function createLog({ action, user, room = null, seat = null, datetime = nu
 
     await logEntry.save();
 }
-
 // Route to INDEX.HTML
 // localhost:3000/
 app.get('/', function(req,res){
@@ -980,6 +984,18 @@ app.post('/profile', isAuthenticated, async(req, res) => {
         }
     
         try {
+           /* const allowedTypes = ['image/jpeg', '/image/png', 'image/jpg'];
+            if (!allowedTypes.includes(profile_picture.mimetype)){
+                
+                 await createLog({
+                    action: 'invalid-profile-picture',
+                    user: email,
+                    details: 'Profile Picture File Format is not accepted.'
+                    });
+
+                return res.status(400).send('Invalid file type. Only JPG, JPEG, and PNG are allowed.');
+            }*/
+
             const fileIdentifier = req.session.user.last_name + '_' + req.session.user.first_name + '_'
             // Move uploaded file
             await profile_picture.mv(path.resolve(__dirname, 'uploads/profile_pics', fileIdentifier + profile_picture.name))
