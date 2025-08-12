@@ -818,7 +818,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     profileInput.value = '';
                     return;
                 }
-
+                */
                 // Show loading state
                 if (uploadPhotoBtn) {
                     uploadPhotoBtn.textContent = 'Uploading...';
@@ -849,8 +849,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         // Reload page to show new profile picture
                         setTimeout(() => {
                             window.location.reload();
-                        }, 1000);
-                        
+                        }, 1000);  
                     } else {
                         // Server-side error (includes comprehensive validation)
                         alert('Error: ' + (result.message || 'Failed to upload profile picture.'));

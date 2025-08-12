@@ -968,6 +968,7 @@ app.get('/profile', isAuthenticated, async (req, res) => {
 
 app.use(fileUpload()) // for fileuploads
 
+
 // Upload Profile Picture POST Route
 app.post('/profile', isAuthenticated, async(req, res) => {
     // Check if file was uploaded
@@ -997,9 +998,8 @@ app.post('/profile', isAuthenticated, async(req, res) => {
         // Check both MIME type and file extension
         if (!allowedTypes.includes(profile_picture.mimetype) || 
             !allowedExtensions.includes(fileExtension)) {
-            
             await createLog({
-                action: 'invalid-profile-picture',
+                action: 'error-profile-picture',
                 user: userData.email,
                 details: `Invalid file type: ${profile_picture.mimetype}. File: ${profile_picture.name}`
             });
@@ -1013,6 +1013,12 @@ app.post('/profile', isAuthenticated, async(req, res) => {
         // OPTIONAL: File size validation (5MB limit)
         const maxSize = 5 * 1024 * 1024; // 5MB
         if (profile_picture.size > maxSize) {
+            await createLog({
+                action: 'error-profile-picture',
+                user: userData.email,
+                details: `File Size is too Large.`
+            });
+
             return res.status(400).json({ 
                 success: false, 
                 message: 'File size too large. Maximum size is 5MB.' 
@@ -1032,7 +1038,8 @@ app.post('/profile', isAuthenticated, async(req, res) => {
         // Update user data
         const updatedUser = await User.findByIdAndUpdate(userData._id, updatedData, { new: true });
         req.session.user = updatedUser; // Update session user data
-
+        
+        
         // Return JSON response instead of redirect for better error handling
         res.status(200).json({ 
             success: true, 
@@ -1040,6 +1047,7 @@ app.post('/profile', isAuthenticated, async(req, res) => {
             profile_picture: updatedData.profile_picture
         });
         
+            
     } catch (error) {
         console.log("Error!", error);
         res.status(500).json({ 
@@ -1048,6 +1056,7 @@ app.post('/profile', isAuthenticated, async(req, res) => {
         });
     }
 });
+
 
 // Submit Profile Details Route
 app.post('/submit-profile-details', isAuthenticated, async (req, res) => {
