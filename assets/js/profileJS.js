@@ -796,14 +796,133 @@ document.addEventListener("DOMContentLoaded", function () {
             profileInput.click();
         });
 
-        profileInput.addEventListener("change", function () {
+        profileInput.addEventListener("change", async function () {
             if (profileInput.files.length > 0) {
-                profileInput.closest("form").submit();
+                const selectedFile = profileInput.files[0];
+                
+                // CLIENT-SIDE VALIDATION
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                const allowedExtensions = ['jpg', 'jpeg', 'png'];
+                const fileExtension = selectedFile.name.toLowerCase().split('.').pop();
+                
+                // Check file type
+                if (!allowedTypes.includes(selectedFile.type) || 
+                    !allowedExtensions.includes(fileExtension)) {
+                    
+                    alert('Invalid file type. Please select a JPG, JPEG, or PNG file.');
+                    profileInput.value = ''; // Clear the input
+                    return;
+                }
+                
+                // OPTIONAL: Check file size (5MB limit)
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (selectedFile.size > maxSize) {
+                    alert('File size too large. Please select a file smaller than 5MB.');
+                    profileInput.value = ''; // Clear the input
+                    return;
+                }
 
-                if (editProfileModal) {
-                    editProfileModal.style.display = "none";
+                // Show loading state
+                if (uploadPhotoBtn) {
+                    uploadPhotoBtn.textContent = 'Uploading...';
+                    uploadPhotoBtn.disabled = true;
+                }
+
+                try {
+                    // Create FormData for file upload
+                    const formData = new FormData();
+                    formData.append('profile_picture', selectedFile);
+
+                    // Upload the file
+                    const response = await fetch('/profile', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Success - close modal and reload page
+                        alert('Profile picture updated successfully!');
+                        
+                        if (editProfileModal) {
+                            editProfileModal.style.display = "none";
+                        }
+                        
+                        // Reload page to show new profile picture
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                        
+                    } else {
+                        // Server-side error
+                        alert('Error: ' + (result.message || 'Failed to upload profile picture.'));
+                    }
+
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    alert('An error occurred while uploading. Please try again.');
+                    
+                } finally {
+                    // Reset button state
+                    if (uploadPhotoBtn) {
+                        uploadPhotoBtn.textContent = 'Upload Photo';
+                        uploadPhotoBtn.disabled = false;
+                    }
+                    
+                    // Clear the file input
+                    profileInput.value = '';
                 }
             }
         });
+    }
+
+    // DRAG AND DROP SUPPORT (Optional Enhancement)
+    const profilePictureArea = document.querySelector('.profile-picture-container');
+    
+    if (profilePictureArea && profileInput) {
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            profilePictureArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Highlight drop area when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            profilePictureArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            profilePictureArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            profilePictureArea.style.border = '2px dashed #377684';
+            profilePictureArea.style.backgroundColor = '#f0f8ff';
+        }
+
+        function unhighlight(e) {
+            profilePictureArea.style.border = '';
+            profilePictureArea.style.backgroundColor = '';
+        }
+
+        // Handle dropped files
+        profilePictureArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            if (files.length > 0) {
+                profileInput.files = files;
+                // Trigger the change event
+                const event = new Event('change', { bubbles: true });
+                profileInput.dispatchEvent(event);
+            }
+        }
     }
 });

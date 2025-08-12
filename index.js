@@ -970,53 +970,84 @@ app.use(fileUpload()) // for fileuploads
 
 // Upload Profile Picture POST Route
 app.post('/profile', isAuthenticated, async(req, res) => {
-
     // Check if file was uploaded
-    if (!req.files || Object.keys(req.files).length === 0)
-        return res.status(400).send('No files were uploaded.')
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'No files were uploaded.' 
+        });
+    }
     
+    const userData = req.session.user;
+    const { profile_picture } = req.files;
     
-    const userData = req.session.user
-    const { profile_picture } = req.files
+    if (!userData) {
+        return res.status(401).json({ 
+            success: false, 
+            message: 'Unauthorized' 
+        });
+    }
     
-        if (!userData) {
-            return res.status(401).send('Unauthorized')
-        }
-    
-        try {
-           /* const allowedTypes = ['image/jpeg', '/image/png', 'image/jpg'];
-            if (!allowedTypes.includes(profile_picture.mimetype)){
-                
-                 await createLog({
-                    action: 'invalid-profile-picture',
-                    user: email,
-                    details: 'Profile Picture File Format is not accepted.'
-                    });
-
-                return res.status(400).send('Invalid file type. Only JPG, JPEG, and PNG are allowed.');
-            }*/
-
-            const fileIdentifier = req.session.user.last_name + '_' + req.session.user.first_name + '_'
-            // Move uploaded file
-            await profile_picture.mv(path.resolve(__dirname, 'uploads/profile_pics', fileIdentifier + profile_picture.name))
-    
-            const updatedData = {
-                ...req.body,
-                profile_picture: 'profile_pics/' + fileIdentifier + profile_picture.name
-            }
-    
-        // Update user data
-            const updatedUser = await User.findByIdAndUpdate(userData._id, updatedData, { new: true })
-            req.session.user = updatedUser // Update session user data
-    
-            res.redirect('/profile')
-        } 
-        catch (error) {
-            console.log("Error!", error)
-            res.status(500).send('Error updating user')
-        }
+    try {
+        // ENHANCED FILE TYPE VALIDATION
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        const fileExtension = profile_picture.name.toLowerCase().split('.').pop();
+        const allowedExtensions = ['jpg', 'jpeg', 'png'];
         
-})
+        // Check both MIME type and file extension
+        if (!allowedTypes.includes(profile_picture.mimetype) || 
+            !allowedExtensions.includes(fileExtension)) {
+            
+            await createLog({
+                action: 'invalid-profile-picture',
+                user: userData.email,
+                details: `Invalid file type: ${profile_picture.mimetype}. File: ${profile_picture.name}`
+            });
+
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid file type. Only JPG, JPEG, and PNG files are allowed.' 
+            });
+        }
+
+        // OPTIONAL: File size validation (5MB limit)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (profile_picture.size > maxSize) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'File size too large. Maximum size is 5MB.' 
+            });
+        }
+
+        const fileIdentifier = req.session.user.last_name + '_' + req.session.user.first_name + '_';
+        
+        // Move uploaded file
+        await profile_picture.mv(path.resolve(__dirname, 'uploads/profile_pics', fileIdentifier + profile_picture.name));
+
+        const updatedData = {
+            ...req.body,
+            profile_picture: 'profile_pics/' + fileIdentifier + profile_picture.name
+        };
+
+        // Update user data
+        const updatedUser = await User.findByIdAndUpdate(userData._id, updatedData, { new: true });
+        req.session.user = updatedUser; // Update session user data
+
+        // Return JSON response instead of redirect for better error handling
+        res.status(200).json({ 
+            success: true, 
+            message: 'Profile picture updated successfully!',
+            profile_picture: updatedData.profile_picture
+        });
+        
+    } catch (error) {
+        console.log("Error!", error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error updating profile picture. Please try again.' 
+        });
+    }
+});
 
 // Submit Profile Details Route
 app.post('/submit-profile-details', isAuthenticated, async (req, res) => {
@@ -1077,7 +1108,6 @@ app.post('/submit-profile-details', isAuthenticated, async (req, res) => {
 });
 
 // Change password POST Route
-// Change password POST Route - Improved version
 app.post('/changepassword', isAuthenticated, async (req, res) => {
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
