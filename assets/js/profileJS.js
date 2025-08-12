@@ -796,29 +796,26 @@ document.addEventListener("DOMContentLoaded", function () {
             profileInput.click();
         });
 
+        // SIMPLIFIED CLIENT-SIDE VALIDATION (Basic checks for UX)
         profileInput.addEventListener("change", async function () {
             if (profileInput.files.length > 0) {
                 const selectedFile = profileInput.files[0];
                 
-                // CLIENT-SIDE VALIDATION
-                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-                const allowedExtensions = ['jpg', 'jpeg', 'png'];
+                // Basic client-side checks for immediate feedback
                 const fileExtension = selectedFile.name.toLowerCase().split('.').pop();
+                const allowedExtensions = ['jpg', 'jpeg', 'png'];
                 
-                // Check file type
-                if (!allowedTypes.includes(selectedFile.type) || 
-                    !allowedExtensions.includes(fileExtension)) {
-                    
-                    alert('Invalid file type. Please select a JPG, JPEG, or PNG file.');
-                    profileInput.value = ''; // Clear the input
+                // Quick extension check
+                if (!allowedExtensions.includes(fileExtension)) {
+                    alert('Please select a JPG, JPEG, or PNG file.');
+                    profileInput.value = '';
                     return;
                 }
                 
-                // OPTIONAL: Check file size (5MB limit)
-                const maxSize = 5 * 1024 * 1024; // 5MB
-                if (selectedFile.size > maxSize) {
+                // Quick size check (5MB limit)
+                if (selectedFile.size > 5 * 1024 * 1024) {
                     alert('File size too large. Please select a file smaller than 5MB.');
-                    profileInput.value = ''; // Clear the input
+                    profileInput.value = '';
                     return;
                 }
 
@@ -833,7 +830,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     const formData = new FormData();
                     formData.append('profile_picture', selectedFile);
 
-                    // Upload the file
+                    // Upload the file - let backend handle comprehensive validation
                     const response = await fetch('/profile', {
                         method: 'POST',
                         body: formData
@@ -855,7 +852,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         }, 1000);
                         
                     } else {
-                        // Server-side error
+                        // Server-side error (includes comprehensive validation)
                         alert('Error: ' + (result.message || 'Failed to upload profile picture.'));
                     }
 
