@@ -497,8 +497,18 @@ app.get('/logs', async (req, res) => {
         first_name: req.session.user.first_name
     });
     
-    try {
-        res.render('logs', { userData: req.session.user, logs
+    try { 
+        // Extract unique actions
+       // Get unique actions from logs
+        const uniqueActions = Array.from(new Set(logs.map(log => log.action)));
+        
+        // Prepare filter options without any mapping/labels
+        const actionsForFilter = uniqueActions.map(action => ({
+            value: action,
+            label: action
+        }));
+        
+        res.render('logs', { userData: req.session.user, logs, actionsForFilter
         });
         console.log('✅ Template rendered successfully');
     } catch (error) {
