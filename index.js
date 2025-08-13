@@ -506,6 +506,11 @@ app.get('/logs', async (req, res) => {
     if (req.session.user.account_type !== 'Lab Technician') {
         console.log('❌ Not a Lab Technician - serving 403');
         console.log('📊 Expected: "Lab Technician", Got:', req.session.user.account_type);
+        await createLog({
+            action: 'error-registration',
+            user: email || "unknown",
+            details: 'You are not a lab technician'
+        });
         return res.status(403).sendFile(path.join(__dirname, '403.html'));
     }
     
