@@ -818,7 +818,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     profileInput.value = '';
                     return;
                 }
-                */
+                
                 // Show loading state
                 if (uploadPhotoBtn) {
                     uploadPhotoBtn.textContent = 'Uploading...';
