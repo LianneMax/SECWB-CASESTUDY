@@ -290,15 +290,22 @@ app.get("/reservations", isLabTech, async (req, res) => {
 app.delete('/reservations/:id', isAuthenticated, isOwnerOrAuthorized, async (req, res) => {
     try {
         const reservationId = req.params.id;
-
+        const user = req.session.user.email;
         // Find and delete the reservation
         const deletedReservation = await Reservation.findByIdAndDelete(reservationId);
 
         if (!deletedReservation) {
             return res.status(404).json({ message: "Reservation not found" });
         }
+  
+        
 
         console.log(`✅ Reservation ${reservationId} deleted successfully by ${req.session.user.email}`);
+        await createLog({ 
+                action: 'reserve-deleted', 
+                user: user, 
+                details: `Reservation ${reservationId} deleted successfully by ${user.email}`
+            });
         res.status(200).json({ message: "Reservation deleted successfully" });
     } catch (error) {
         console.error("⚠️ Error deleting reservation:", error);
