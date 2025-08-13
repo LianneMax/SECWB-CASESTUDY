@@ -464,6 +464,20 @@ app.get('/about-us', function(req,res){
     res.sendFile(__dirname + '/' + 'about-us.html')
 })
 
+//better formatting for logs actions.
+hbs.registerHelper('logClass', function(action) {
+  const lower = action.toLowerCase();
+  if (lower.includes('success') || lower.includes('create')) {
+    return 'create';
+  }else if (lower.includes('updated') || lower.includes('update')) {
+    return 'edit';
+  }else if (lower.includes('fail') || lower.includes('error') || lower.includes('no') || lower.includes('locked') || lower.includes('invalid')) {
+    return 'delete';
+  }
+  // Default class or empty string
+  return '';
+});
+
 // Route to logs.hbs
 // localhost:3000/logs
 // Replace your existing logs route with this debugging version:
@@ -524,7 +538,7 @@ app.get('/logs', async (req, res) => {
                 log.formattedTimestamp = 'N/A';
             }
             });
-            
+
         res.render('logs', { userData: req.session.user, logs, actionsForFilter
         });
         console.log('✅ Template rendered successfully');
@@ -1631,7 +1645,7 @@ app.put('/update-reservation/:id', isAuthenticated, isOwnerOrAuthorized, async (
         console.log(`✅ Reservation ${id} updated successfully by ${user.email}`);
         
         await createLog({ 
-                action: 'reserve-update-success', 
+                action: 'reserve-updated', 
                 user: user.email, 
                 room: room, 
                 seat: seat, 

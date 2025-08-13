@@ -84,7 +84,7 @@
                     {{#each logs}}
                         <tr>
                         <td>{{formattedTimestamp}}</td>
-                        <td><span class="log-level create">{{action}}</span></td>
+                        <td><span class="log-level {{logClass action}}">{{action}}</span></td>
                         <td>{{user}}</td>
                         <td>{{room}}</td>
                         <td>{{seat}}</td>
