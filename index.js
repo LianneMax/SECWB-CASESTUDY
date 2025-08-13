@@ -998,6 +998,7 @@ app.post('/profile', isAuthenticated, async(req, res) => {
         // Check both MIME type and file extension
         if (!allowedTypes.includes(profile_picture.mimetype) || 
             !allowedExtensions.includes(fileExtension)) {
+                console.log("Invalid file type, creating log...");
             await createLog({
                 action: 'error-profile-picture',
                 user: userData.email,
@@ -1013,11 +1014,12 @@ app.post('/profile', isAuthenticated, async(req, res) => {
         // OPTIONAL: File size validation (5MB limit)
         const maxSize = 5 * 1024 * 1024; // 5MB
         if (profile_picture.size > maxSize) {
+            console.log("File Size Too Big..., creating log...");
             await createLog({
                 action: 'error-profile-picture',
                 user: userData.email,
                 details: `File Size is too Large.`
-            });
+            }); 
 
             return res.status(400).json({ 
                 success: false, 
@@ -1038,8 +1040,14 @@ app.post('/profile', isAuthenticated, async(req, res) => {
         // Update user data
         const updatedUser = await User.findByIdAndUpdate(userData._id, updatedData, { new: true });
         req.session.user = updatedUser; // Update session user data
-        
-        
+                    console.log("Profile picture updated successfully!..., creating log...");
+
+         await createLog({
+                action: 'success-profile-picture',
+                user: userData.email,
+                details: `Profile picture updated successfully!`
+            }); 
+
         // Return JSON response instead of redirect for better error handling
         res.status(200).json({ 
             success: true, 
@@ -1049,6 +1057,14 @@ app.post('/profile', isAuthenticated, async(req, res) => {
         
             
     } catch (error) {
+         console.log("Profile picture error!..., creating log...");
+           await createLog({
+                action: 'error-profile-picture',
+                user: userData.email,
+                details: `Error updating profile picture. Please try again.`
+            }); 
+
+
         console.log("Error!", error);
         res.status(500).json({ 
             success: false, 
