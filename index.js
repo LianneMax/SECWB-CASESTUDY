@@ -647,12 +647,14 @@ app.post('/register', async (req, res) => {
             });
         }
 
+        const hashedSecurityAnswer = sha256(security_answer.trim());
+
         // Create security question document
         const securityQuestionDoc = new SecurityQuestion({
             user_id: savedUser._id,
             email: email,
             security_question,
-            security_answer: security_answer
+            security_answer: hashedSecurityAnswer
         });
 
         await securityQuestionDoc.save();
@@ -771,7 +773,9 @@ app.post('/verify-security-answer', async (req, res) => {
             });
         }
 
-        if (securityQuestion.security_answer === answer) {
+        const hashedAnswer = sha256(answer.trim());
+
+        if (securityQuestion.security_answer === hashedAnswer) {
             req.session.resetPasswordEmail = email;
             res.json({ success: true });
         } else {
