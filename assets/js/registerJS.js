@@ -87,8 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
             */
-            // Remove confirm_password from data before sending to server
-            const { confirm_password, ...serverData } = data;
+             const serverData = data;
 
             try {
                 const response = await fetch("/register", {

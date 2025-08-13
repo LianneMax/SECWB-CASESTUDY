@@ -467,12 +467,14 @@ app.get('/about-us', function(req,res){
 //better formatting for logs actions.
 hbs.registerHelper('logClass', function(action) {
   const lower = action.toLowerCase();
-  if (lower.includes('success') || lower.includes('create')) {
+     if (lower.includes('deleted') || lower.includes('delete')) {
+    return 'delete'; 
+    }else if (lower.includes('success') || lower.includes('create')) {
     return 'create';
   }else if (lower.includes('updated') || lower.includes('update')) {
     return 'edit';
   }else if (lower.includes('fail') || lower.includes('error') || lower.includes('no') || lower.includes('locked') || lower.includes('invalid')) {
-    return 'delete';
+    return 'error';
   }
   // Default class or empty string
   return '';
@@ -564,13 +566,14 @@ app.post('/register', async (req, res) => {
             last_name, 
             email, 
             password, 
+            confirm_password,
             account_type,
             security_question,
             security_answer 
         } = req.body;
 
         // Check for missing fields
-        if (!first_name || !last_name || !email || !password || !account_type || !security_question || !security_answer) {
+        if (!first_name || !last_name || !email || !password || !confirm_password ||  !account_type || !security_question || !security_answer) {
             console.log("Missing fields... creating log...");
            await createLog({
             action: 'error-registration',
@@ -646,6 +649,15 @@ app.post('/register', async (req, res) => {
                 message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
             });
         }
+
+            if (password !== confirm_password) {
+            await createLog({
+                action: 'error-registration',
+                user: email || "unknown",
+                details: 'Passwords do not match.'
+            });
+            return res.status(400).json({ success: false, message: "Passwords do not match." });
+            }
 
         // Check for existing user BEFORE creating new one
         const existingUser = await User.findOne({ email });
@@ -1328,37 +1340,53 @@ app.post('/deleteaccount', isAuthenticated, async (req, res) => {
         const { currentPassword } = req.body;
 
         const user = await User.findById(user_id);
-
+        
         // Re-authenticate
         if (user.password !== sha256(currentPassword)) {
-            
+             await createLog({
+                action: 'error-deleteacct',
+                user: email || "unknown",
+                details: 'Incorrect password inputted!!!'
+            });
             return res.status(400).json({ 
                 success: false, 
                 message: "Incorrect password inputted!" 
             });
         }
-
+       
         // Delete all future reservations associated with the user
         const currentDate = new Date();
         const deletedReservations = await Reservation.deleteMany({
             reserved_for_email: user_email,
             reserved_date: { $gte: currentDate }
         });
-
+        await createLog({
+                action: 'success-deleteacct',
+                user: user_email || "unknown",
+                details: `User ${user.email} deleted.`
+            });
         const deletedSecurityQuestion = await SecurityQuestion.deleteMany({
             email: user_email,
         });
-
+        
         console.log(`🗑️ Deleted ${deletedReservations.deletedCount} future reservations for user: ${user.email}`);
+         await createLog({
+            action: 'delete-future-reservations',
+            user: user.email,
+            details: `Deleted ${deletedReservations.deletedCount} future reservations for user: ${user.email}`
+            });
+            
         console.log(`🕒 Current session time: ${currentDate.toISOString()}`);
 
         // Find and delete the user
         const deletedUser = await User.findByIdAndDelete(user_id);
 
         if (!deletedUser) {
+
             return res.status(404).json({ message: "User not found" });
         }
-
+        
+        
         console.log(`❌ User deleted: ${deletedUser.email}`);
 
         // Destroy session and log out

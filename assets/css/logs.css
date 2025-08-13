@@ -307,8 +307,13 @@ html, body {
 }
 
 .log-level.delete {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: #330155;
+    color: #ffffff;
+}
+
+.log-level.error {
+    background-color: #721c24;
+    color: #ffffff;
 }
 
 .log-level.login {
