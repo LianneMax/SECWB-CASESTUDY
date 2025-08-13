@@ -800,7 +800,7 @@ document.addEventListener("DOMContentLoaded", function () {
         profileInput.addEventListener("change", async function () {
             if (profileInput.files.length > 0) {
                 const selectedFile = profileInput.files[0];
-                
+                /*
                 // Basic client-side checks for immediate feedback
                 const fileExtension = selectedFile.name.toLowerCase().split('.').pop();
                 const allowedExtensions = ['jpg', 'jpeg', 'png'];
@@ -824,7 +824,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     uploadPhotoBtn.textContent = 'Uploading...';
                     uploadPhotoBtn.disabled = true;
                 }
-
+                */
                 try {
                     // Create FormData for file upload
                     const formData = new FormData();
