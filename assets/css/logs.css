@@ -228,7 +228,7 @@ html, body {
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
+    overflow: hidden; 
 }
 
 .logs-header {
@@ -251,6 +251,7 @@ html, body {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    table-layout: fixed;
 }
 
 .logs-table thead th {
@@ -276,6 +277,38 @@ html, body {
 .logs-table tbody td {
     padding: 12px 8px;
     vertical-align: top;
+}
+
+.logs-table thead th:nth-child(1),
+.logs-table tbody td:nth-child(1) {
+    width: 15%; /* Timestamp */
+}
+
+.logs-table thead th:nth-child(2),
+.logs-table tbody td:nth-child(2) {
+    width: 18%; /* Action */
+}
+
+.logs-table thead th:nth-child(3),
+.logs-table tbody td:nth-child(3) {
+      word-wrap: break-word;       /* break long words if needed */
+  overflow-wrap: break-word;
+    width: 14%; /* User */
+}
+
+.logs-table thead th:nth-child(4),
+.logs-table tbody td:nth-child(4) {
+    width: 6%; /* Room */
+}
+
+.logs-table thead th:nth-child(5),
+.logs-table tbody td:nth-child(5) {
+    width: 6%; /* Seat */
+}
+
+.logs-table thead th:nth-child(6),
+.logs-table tbody td:nth-child(6) {
+    width: 15%; /* Date/Time */
 }
 
 .logs-table td:nth-child(7) {  /* 7th column = Details */
