@@ -297,13 +297,14 @@ app.delete('/reservations/:id', isAuthenticated, isOwnerOrAuthorized, async (req
         if (!deletedReservation) {
             return res.status(404).json({ message: "Reservation not found" });
         }
-  
-        
 
         console.log(`✅ Reservation ${reservationId} deleted successfully by ${req.session.user.email}`);
         await createLog({ 
                 action: 'reserve-deleted', 
                 user: user, 
+                room: deletedReservation.room_num || "N/A",
+                seat: deletedReservation.seat_num || "N/A",
+                datetime: deletedReservation.reserved_date || null,
                 details: `Reservation ${reservationId} deleted successfully by ${user.email}`
             });
         res.status(200).json({ message: "Reservation deleted successfully" });
@@ -1180,21 +1181,37 @@ app.post('/submit-profile-details', isAuthenticated, async (req, res) => {
     try {
         const userData = req.session.user;
         const { first_name, last_name, description } = req.body;
+        const user_email = req.session.user.email;
 
         // Validation checks
         if (first_name && first_name.length > 25) {
+            await createLog({
+                action: 'error-profileupdate',
+                user: user_email || "unknown",
+                details: 'First name must be at most 25 characters.' 
+            });
             return res.status(400).json({ 
                 success: false, 
                 message: 'First name must be at most 25 characters.' 
             });
         }
         if (last_name && last_name.length > 25) {
+            await createLog({
+                action: 'error-profileupdate',
+                user: user_email || "unknown",
+                details: 'Last name must be at most 25 characters.'
+            });
             return res.status(400).json({ 
                 success: false, 
                 message: 'Last name must be at most 25 characters.' 
             });
         }
         if (description && description.length > 50) {
+             await createLog({
+                action: 'error-profileupdate',
+                user: user_email || "unknown",
+                details: `Description must be at most 50 characters.'`
+            });
             return res.status(400).json({ 
                 success: false, 
                 message: 'Description must be at most 50 characters.' 
@@ -1213,6 +1230,13 @@ app.post('/submit-profile-details', isAuthenticated, async (req, res) => {
             console.log("✅ Profile updated:", updatedData);
 
             // Return JSON response instead of redirect
+
+            await createLog({
+                action: 'success-profileupdate',
+                user: user_email || "unknown",
+                details: 'Profile updated successfully!'
+            });
+
             return res.status(200).json({ 
                 success: true, 
                 message: "Profile updated successfully!" 
@@ -1238,9 +1262,15 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
         const user_id = req.session.user._id;
+        const user_email = req.session.user.email;
 
         // Validation: Check if all fields are provided
         if (!currentPassword || !newPassword || !confirmPassword) {
+            await createLog({
+                action: 'error-passupdate',
+                user: user_email || "unknown",
+                details: 'Not all password fields have been filled in.'
+            });
             return res.status(400).json({
                 success: false,
                 message: "Please fill in all password fields."
@@ -1249,6 +1279,11 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
 
         // Validation: Check if new passwords match
         if (newPassword !== confirmPassword) {
+            await createLog({
+                action: 'error-passupdate',
+                user: user_email || "unknown",
+                details: 'Passwords do not match.'
+            });
             return res.status(400).json({
                 success: false,
                 message: "New password and confirmation password do not match."
@@ -1266,6 +1301,11 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
 
         // Re-authenticate: Verify current password
         if (user.password !== sha256(currentPassword)) {
+            await createLog({
+                action: 'error-passupdate',
+                user: user_email || "unknown",
+                details: 'Current password is incorrect.'
+            });
             return res.status(401).json({
                 success: false,
                 message: "Current password is incorrect."
@@ -1275,6 +1315,11 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
         // Trim and check complexity of new password
         const trimmedPassword = newPassword.trim();
         if (!isPasswordComplex(trimmedPassword)) {
+            await createLog({
+                action: 'error-passupdate',
+                user: user_email || "unknown",
+                details: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.'
+            });
             return res.status(400).json({
                 success: false,
                 message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
@@ -1284,6 +1329,11 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
         // Prevent password re-use
         const hashedPassword = sha256(trimmedPassword);
         if (user.password === hashedPassword) {
+             await createLog({
+                action: 'error-passupdate',
+                user: user_email || "unknown",
+                details: 'New password cannot be the same as the current password.'
+            });
             return res.status(400).json({
                 success: false,
                 message: "New password cannot be the same as the current password."
@@ -1312,7 +1362,11 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
         });
 
         console.log(`✅ Password updated successfully for user: ${req.session.user.email}`);
-
+        await createLog({
+                action: 'success-passupdate',
+                user: user_email || "unknown",
+                details: 'Password updated successfully.'
+            });
         // Return success response
         res.status(200).json({
             success: true,
@@ -1332,6 +1386,11 @@ app.post('/changepassword', isAuthenticated, async (req, res) => {
 
     } catch (err) {
         console.error("⚠️ Error updating password:", err);
+         await createLog({
+                action: 'error-passupdate',
+                user: user_email || "unknown",
+                details: 'Internal server error.'
+            });
         res.status(500).json({
             success: false,
             message: "An internal error occurred. Please try again later."
