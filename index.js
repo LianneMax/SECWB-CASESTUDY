@@ -510,11 +510,13 @@ app.get('/logs', async (req, res) => {
 // Route to register.html
 // localhost:3000/register
 app.get('/register', function(req,res){
+    console.log("GET /REGISTER ROUTE HIT.");
     res.sendFile(__dirname + '/' + 'register.html')
 })
 
 // User registration POST Route
 app.post('/register', async (req, res) => {
+   console.log("POST /REGISTER ROUTE HIT.");
     try {
         const { 
             first_name, 
@@ -528,6 +530,12 @@ app.post('/register', async (req, res) => {
 
         // Check for missing fields
         if (!first_name || !last_name || !email || !password || !account_type || !security_question || !security_answer) {
+            console.log("Missing fields... creating log...");
+           await createLog({
+            action: 'error-registration',
+            user: email || "unknown",
+            details: 'There are missing required fields.'
+        });
             return res.status(400).json({ 
                 success: false, 
                 message: "Missing required fields" 
@@ -538,7 +546,7 @@ app.post('/register', async (req, res) => {
         if (first_name.length > 25) {
             await createLog({
             action: 'error-registration',
-            user: email,
+            user: email || "unknown",
             details: 'First name must be at most 25 characters.'
         });
             return res.status(400).json({ success: false, message: "First name must be at most 25 characters." });
@@ -546,7 +554,7 @@ app.post('/register', async (req, res) => {
         if (last_name.length > 25) {
             await createLog({
             action: 'error-registration',
-            user: email,
+            user: email || "unknown",
             details: 'Last name must be at most 25 characters.'
         });
             return res.status(400).json({ success: false, message: "Last name must be at most 25 characters." });
@@ -554,7 +562,7 @@ app.post('/register', async (req, res) => {
         if (security_answer.length > 50) {
             await createLog({
             action: 'error-registration',
-            user: email,
+            user: email || "unknown",
             details: 'Security answer must be at most 50 characters.'
         });
             return res.status(400).json({ success: false, message: "Security answer must be at most 50 characters." });
@@ -563,7 +571,7 @@ app.post('/register', async (req, res) => {
         if (emailLocalPart.length > 64) {
             await createLog({
             action: 'error-registration',
-            user: email,
+            user: email || "unknown",
             details: 'Email local part must be at most 64 characters."'
         });
             return res.status(400).json({ success: false, message: "Email local part must be at most 64 characters." });
@@ -573,7 +581,7 @@ app.post('/register', async (req, res) => {
         if (!email.endsWith("@dlsu.edu.ph")) {
             await createLog({
             action: 'error-email-domain',
-            user: email,
+            user: email || "unknown",
             details: 'Email must end with @dlsu.edu.ph' 
         });
             return res.status(400).json({
@@ -589,7 +597,7 @@ app.post('/register', async (req, res) => {
         if (!isPasswordComplex(trimmedPassword)) {
             await createLog({
             action: 'error-password-complexity',
-            user: email,
+            user: email || "unknown",
             details: 'Password did not meet requirements.'
         });
             return res.status(400).json({
@@ -601,6 +609,12 @@ app.post('/register', async (req, res) => {
         // Check for existing user BEFORE creating new one
         const existingUser = await User.findOne({ email });
         if (existingUser) {
+            await createLog({
+            action: 'error-existing-user',
+            user: email || "unknown",
+            details: 'This account already exists'
+        });
+
             return res.status(409).json({
                 success: false,
                 message: "This account already exists"
@@ -621,6 +635,12 @@ app.post('/register', async (req, res) => {
         const savedUser = await newUser.save();
 
         if (!SECURITY_QUESTIONS.includes(security_question)) {
+        await createLog({
+            action: 'error-user-registration',
+            user: email || "unknown",
+            details: 'Invalid security question selected.'
+        });
+
             return res.status(400).json({
                 success: false,
                 message: "Invalid security question selected."
@@ -638,6 +658,13 @@ app.post('/register', async (req, res) => {
         await securityQuestionDoc.save();
 
         console.log("✅ New user registered with security question:", email);
+        console.log("Account created successfully! Creating log...", email);
+        await createLog({
+            action: 'success-user-registration',
+            user: email || "unknown",
+            details: 'User Successfully Registered!'
+        });
+
         res.status(201).json({ 
             success: true, 
             message: "User registered successfully!" 
@@ -810,6 +837,12 @@ app.post('/reset-password', async (req, res) => {
         const lastChanged = user.passwordLastChanged || user.createdAt || user._id.getTimestamp();
         const oneDay = 24 * 60 * 60 * 1000;
         if (now - lastChanged < oneDay) {
+            await createLog({
+            action: 'error-password-reset',
+            user: email,
+            details: 'You can only change your password once every 24 hours.'
+        });
+
             return res.status(400).json({
                 success: false,
                 message: "You can only change your password once every 24 hours."
@@ -822,7 +855,11 @@ app.post('/reset-password', async (req, res) => {
             { password: hashedPassword, passwordLastChanged: now },
             { new: true }
         );
-
+        await createLog({
+            action: 'success-password-reset',
+            user: email,
+            details: 'Password updated successfully.'
+        });
         res.json({ 
             success: true, 
             message: "Password updated successfully" 

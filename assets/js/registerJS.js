@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
             };
 
             const hasMissingFields = Object.values(data).some(value => !value);
-            if (hasMissingFields) {
+           /* if (hasMissingFields) {
                 alert("⚠️ Missing input. Please fill in all required fields.");
                 return;
             }
@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Check if passwords match
             if (data.password !== data.confirm_password) {
                 alert("⚠️ Passwords do not match. Please ensure both password fields are identical.");
-                return;
+               return;
             }
 
             // Check if email contains @dlsu.edu.ph
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert("⚠️ Email must be a valid DLSU email ending with @dlsu.edu.ph.");
                 return;
             }
-
+            */
             // Remove confirm_password from data before sending to server
             const { confirm_password, ...serverData } = data;
 
@@ -103,7 +103,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     successModal.open();
                 } else {
                     const msg = result.message?.toLowerCase() || "";
-
+                    alert(msg);
+                    /*
                     if (msg.includes("already exists") || msg.includes("duplicate")) {
                         alert("⚠️ This account already exists. Please try logging in.");
                     } else if (msg.includes("missing input")) {
@@ -111,6 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     } else {
                         alert(result.message || "⚠️ An unexpected error occurred. Please try again.");
                     }
+                        */
                 }
             } catch (error) {
                 console.error("❌ Registration error:", error);
