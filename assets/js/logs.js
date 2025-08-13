@@ -11,38 +11,53 @@ function setDefaultDates() {
 
 // Apply filters function
 function applyFilters() {
-    const dateFrom = document.getElementById('dateFrom').value;
-    const dateTo = document.getElementById('dateTo').value;
-    const actionFilter = document.getElementById('actionFilter').value;
-    const userFilter = document.getElementById('userFilter').value.toLowerCase();
+  const dateFromStr = document.getElementById('dateFrom').value;  // "YYYY-MM-DD"
+  const dateToStr = document.getElementById('dateTo').value;      // "YYYY-MM-DD"
+  const actionFilter = document.getElementById('actionFilter').value.toLowerCase();
+  const userFilter = document.getElementById('userFilter').value.toLowerCase();
 
-    const rows = document.querySelectorAll('#logsTableBody tr');
-    
-    rows.forEach(row => {
-        const timestamp = row.cells[0].textContent;
-        const action = row.cells[1].textContent.toLowerCase();
-        const user = row.cells[2].textContent.toLowerCase();
-        
-        const rowDate = timestamp.split(' ')[0];
-        
-        let showRow = true;
-        
-        // Date filtering
-        if (dateFrom && rowDate < dateFrom) showRow = false;
-        if (dateTo && rowDate > dateTo) showRow = false;
-        
-        // Action filtering
-        if (actionFilter && !action.includes(actionFilter)) showRow = false;
-        
-        // User filtering
-        if (userFilter && !user.includes(userFilter)) showRow = false;
-        
-        row.style.display = showRow ? '' : 'none';
-    });
-    
-    // Show message if no results found
-    updateNoResultsMessage();
+  const table = document.getElementById('logsTable');
+  const tbody = table.getElementsByTagName('tbody')[0];
+  const rows = tbody.getElementsByTagName('tr');
+
+  // Convert filter dates to Date objects at midnight local time
+  const dateFrom = dateFromStr ? new Date(dateFromStr) : null;
+  const dateTo = dateToStr ? new Date(dateToStr) : null;
+
+  for (let row of rows) {
+    const timestampStr = row.cells[0].innerText;  // e.g. "2025-08-13T02:04:01.767+00:00"
+    const timestamp = new Date(timestampStr);
+
+    const action = row.cells[1].innerText.toLowerCase();
+    const user = row.cells[2].innerText.toLowerCase();
+
+    let showRow = true;
+
+    if (dateFrom && timestamp < dateFrom) {
+      showRow = false;
+    }
+
+    if (dateTo) {
+      // Include whole 'dateTo' day by adding one day to dateTo
+      const dateToInclusive = new Date(dateTo);
+      dateToInclusive.setDate(dateToInclusive.getDate() + 1);
+      if (timestamp >= dateToInclusive) {
+        showRow = false;
+      }
+    }
+
+    if (actionFilter && action !== actionFilter) {
+      showRow = false;
+    }
+
+    if (userFilter && !user.includes(userFilter)) {
+      showRow = false;
+    }
+
+    row.style.display = showRow ? '' : 'none';
+  }
 }
+
 
 // Clear filters function
 function clearFilters() {

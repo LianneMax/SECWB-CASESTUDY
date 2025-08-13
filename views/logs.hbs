@@ -50,10 +50,9 @@
                     <label for="actionFilter">Action Type:</label>
                     <select id="actionFilter">
                         <option value="">All Actions</option>
-                        <option value="create">Create</option>
-                        <option value="edit">Edit</option>
-                        <option value="delete">Delete</option>
-                        <option value="login">Login</option>
+                        {{#each actionsForFilter}}
+                            <option value="{{this.value}}">{{this.label}}</option>
+                        {{/each}}
                     </select>
                 </div>
                 <div class="filter-group">
@@ -81,19 +80,19 @@
                             <th>Details</th>
                         </tr>
                     </thead>
+                    <tbody id="logsTableBody">
                     {{#each logs}}
-                    <tbody id="logsTableBody">   
                         <tr>
-                            <td>{{timestamp}}</td>
-                            <td><span class="log-level create">{{action}}</span></td>
-                            <td>{{user}}</td>
-                            <td>{{room}}</td>
-                            <td>{{seat}}</td>
-                            <td>{{datetime}}</td>
-                            <td>{{details}}</td>
+                        <td>{{timestamp}}</td>
+                        <td><span class="log-level create">{{action}}</span></td>
+                        <td>{{user}}</td>
+                        <td>{{room}}</td>
+                        <td>{{seat}}</td>
+                        <td>{{datetime}}</td>
+                        <td>{{details}}</td>
                         </tr>
-                    </tbody>
                     {{/each}}
+                    </tbody>
                 </table>
             </div>
         </div>
