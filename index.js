@@ -508,6 +508,23 @@ app.get('/logs', async (req, res) => {
             label: action
         }));
         
+        logs.forEach(log => {
+            if (log.timestamp) {
+                log.formattedTimestamp = new Date(log.timestamp).toLocaleString('en-US', {
+                timeZone: 'Asia/Manila',       // Adjust timezone if needed
+                year: 'numeric',
+                month: 'short',                // e.g. Aug
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+                });
+            } else {
+                log.formattedTimestamp = 'N/A';
+            }
+            });
+            
         res.render('logs', { userData: req.session.user, logs, actionsForFilter
         });
         console.log('✅ Template rendered successfully');
@@ -1443,6 +1460,14 @@ app.post('/reserve', isAuthenticated, async (req, res) => {
         // Check if seat is already reserved
         const existingReservation = await Reservation.findOne({ room_num, seat_num, reserved_date })
         if (existingReservation) {
+            await createLog({ 
+                action: 'reserve-failed-seat-taken', 
+                user: user.email, 
+                room: room_num, 
+                seat: seat_num, 
+                datetime: reserved_date,
+                details: 'Seat already reserved for this date'
+            });
             return res.status(400).json({ message: "Seat already reserved for this date" })
         }
 
@@ -1473,8 +1498,17 @@ app.post('/reserve', isAuthenticated, async (req, res) => {
         })
 
         await newReservation.save()
+        await createLog({ 
+                action: 'reserve-created-success', 
+                user: user.email, 
+                room: room_num, 
+                seat: seat_num, 
+                datetime: reserved_date,
+                details: `Reservation created by ${user.first_name} (${user.account_type}) for ${finalReservedForEmail || "Anonymous"}`
+            });
+            return 
         console.log(`✅ Reservation created by ${user.first_name} (${user.account_type}) for ${finalReservedForEmail || "Anonymous"}`)
-
+             res.status(400).json({ message: "Seat already reserved for this date" })
         res.status(201).json({ message: "Reservation created successfully!" })
     } catch (err) {
         console.error("⚠️ Error creating reservation:", err)
@@ -1534,6 +1568,14 @@ app.put('/update-reservation/:id', isAuthenticated, isOwnerOrAuthorized, async (
         });
 
         if (conflictingReservation) {
+             await createLog({ 
+                action: 'reserve-conflict', 
+                user: user.email, 
+                room: room, 
+                seat: seat,  
+                datetime: reserved_date,
+                details: `Conflict found for ${room} seat ${seat} at ${reservationDateTime || "Anonymous"}`
+            });
             console.log(`❌ Conflict found for ${room} seat ${seat} at ${reservationDateTime}`);
             return res.status(409).json({ error: 'Seat already reserved at that date and time' });
         }
@@ -1569,12 +1611,29 @@ app.put('/update-reservation/:id', isAuthenticated, isOwnerOrAuthorized, async (
         );
 
         if (!updatedReservation) {
+            await createLog({ 
+                action: 'reserve-update-fail', 
+                user: user.email, 
+                room: room, 
+                seat: seat, 
+                datetime: reserved_date,
+                details: `Failed to update reservation ${id}`
+            });
             console.log(`❌ Failed to update reservation ${id}`);
             return res.status(500).json({ error: 'Failed to update reservation' });
         }
 
+
         console.log(`✅ Reservation ${id} updated successfully by ${user.email}`);
         
+        await createLog({ 
+                action: 'reserve-update-success', 
+                user: user.email, 
+                room: room, 
+                seat: seat, 
+                datetime: reserved_date,
+                details: `Reservation ${id} updated successfully by ${user.email}`
+            });
         // Return the updated reservation data
         res.json({
             success: true,

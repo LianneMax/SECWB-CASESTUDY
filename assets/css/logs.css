@@ -278,6 +278,15 @@ html, body {
     vertical-align: top;
 }
 
+.logs-table td:nth-child(7) {  /* 7th column = Details */
+  max-width: 300px;            /* or any width you want */
+  white-space: normal;         /* allow text to wrap */
+  word-wrap: break-word;       /* break long words if needed */
+  overflow-wrap: break-word;
+  /* Optional: add some padding */
+  padding-right: 10px;
+}
+
 /* Log Level Badges */
 .log-level {
     padding: 4px 8px;
